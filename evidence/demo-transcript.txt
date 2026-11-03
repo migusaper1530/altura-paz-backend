@@ -1,0 +1,19 @@
+
+> altura-paz-backend@0.1.0 demo
+> node scripts/demo.mjs
+
+Altura Paz · demostración con datos sintéticos. GPX ilustrativo; no navegar.
+✓ Crear cuenta autora
+✓ Crear cuenta visitante
+✓ Importar GPX como borrador
+✓ Publicar ruta
+✓ Registrar visita autenticada
+✓ Declarar finalización manual
+✓ Repetir declaración sin duplicar personas
+✓ Añadir comentario en un punto del trazado
+✓ Publicar reporte sin verificación previa
+✓ Consultar la prueba directamente en la EVM local
+
+Ruta pública de la demo: http://localhost:8088/api/routes/fdb229e8-b843-4106-a34f-8abecef4efee
+Recibo y resultados: evidence/demo-result.json
+La red usada es local. No se ha desplegado en Sepolia.

@@ -1,0 +1,52 @@
+{
+  "run_at_la_paz": "2026-11-03T10:48:50.509216-04:00",
+  "node": {
+    "tests_passed": 31,
+    "statements_pct": 96.31,
+    "branches_pct": 84.12,
+    "functions_pct": 96.25,
+    "lines_pct": 96.78
+  },
+  "java": {
+    "tests_passed": 11,
+    "covered_lines": 74,
+    "total_lines": 76,
+    "lines_pct": 97.37
+  },
+  "solidity": {
+    "tests_passed": 5,
+    "network": "in-process EVM"
+  },
+  "load": {
+    "offered_rps": 1000,
+    "duration_seconds": 15,
+    "actual_rps": 999.9878102279204,
+    "requests": 15001,
+    "p95_ms": 0.75669,
+    "failed_fraction": 0,
+    "dropped_iterations": 0,
+    "cache_ttl_seconds": 1,
+    "scope": "repeated anonymous GET /api/routes?limit=20 on local Docker network",
+    "api_rate_limit_during_load": 1000000,
+    "normal_rate_limit_restored": 600
+  },
+  "demo": {
+    "step": "Huella verificada en EVM local",
+    "route_id": "fdb229e8-b843-4106-a34f-8abecef4efee",
+    "version": 1,
+    "chain_id": 31337,
+    "contract_address": "0xe78A0F7E598Cc8b0Bb87894B0F60dD2a88d6a8Ab",
+    "transaction_hash": "0x61e2626fc4bea5cf495228cc14de0919d30e5d14f59d90b2380acabf1d7b962f",
+    "digest": "0xa625ce8396b1f32bd44489cd37e68f68e6b54894bc3fa01940d647a16893503a",
+    "distance_m": 3026.6,
+    "ascent_m": 240,
+    "estimated_minutes": 70,
+    "completed_people": 1
+  },
+  "tls": {
+    "negotiated": "TLSv1.3",
+    "certificate_verified": true,
+    "tls12_rejected": true,
+    "run_at": "2026-11-03T14:27:37.524637+00:00"
+  }
+}

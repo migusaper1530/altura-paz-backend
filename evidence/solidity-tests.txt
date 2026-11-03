@@ -1,0 +1,27 @@
+
+> altura-paz-backend@0.1.0 contract:test
+> node --test test/contract.test.mjs
+
+This version of µWS is not compatible with your Node.js build:
+
+Error: Cannot find module '../binaries/uws_linux_x64_137.node'
+Require stack:
+- <project>/node_modules/ganache/node_modules/@trufflesuite/uws-js-unofficial/src/uws.js
+- <project>/node_modules/ganache/dist/node/core.js
+Falling back to a NodeJS implementation; performance may be degraded.
+
+
+RouteRegistry compilado con Solidity 0.8.38+commit.1835d247.Emscripten.clang
+✔ el publicador registra una prueba consultable con recibo real (162.075394ms)
+✔ rechaza escrituras de cuentas ajenas (13.233097ms)
+✔ una versión registrada no se sobrescribe (41.537603ms)
+✔ rechaza identificadores y huellas vacíos (11.193844ms)
+✔ traspaso de propiedad requiere aceptación del destinatario (65.320294ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1643.17446

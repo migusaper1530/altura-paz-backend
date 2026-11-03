@@ -1,0 +1,72 @@
+name: SQA y staging
+on:
+  push:
+    branches: [main, develop]
+  pull_request: {}
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: Desplegar staging después de las pruebas
+        type: boolean
+        default: false
+permissions:
+  contents: read
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '24', cache: npm}
+      - run: npm ci --no-audit --no-fund
+      - name: Comprobación estática y contrato
+        run: |
+          npm run lint
+          npm run contract:test
+      - name: Construir y arrancar entorno aislado
+        run: |
+          node scripts/setup.mjs
+          docker compose up -d --build
+      - name: Esperar a la API
+        run: |
+          for i in $(seq 1 40); do
+            if curl -fsS http://localhost:8088/api/routes > /dev/null; then exit 0; fi
+            sleep 2
+          done
+          exit 1
+      - name: Pruebas de integración instrumentadas
+        run: docker compose run --rm qa npm run test:coverage
+      - name: Demostración verificable
+        run: npm run demo
+      - name: Publicar evidencia
+        if: always()
+        uses: actions/upload-artifact@v4
+        with: {name: evidencia-sqa, path: evidence/}
+      - if: always()
+        run: docker compose down
+  staging:
+    needs: qa
+    if: github.event_name == 'workflow_dispatch' && inputs.deploy
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configurar acceso SSH
+        env:
+          SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.STAGING_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+      - name: Enviar código y desplegar staging
+        env:
+          STAGING_TARGET: ${{ secrets.STAGING_SSH_TARGET }}
+          STAGING_PATH: ${{ secrets.STAGING_PATH }}
+        run: |
+          test -n "$STAGING_TARGET"
+          test -n "$STAGING_PATH"
+          rsync -az --exclude='.git' --exclude='.env' --exclude='node_modules' --exclude='evidence' ./ "$STAGING_TARGET:$STAGING_PATH/"
+          ssh "$STAGING_TARGET" "cd '$STAGING_PATH' && docker compose up -d --build"

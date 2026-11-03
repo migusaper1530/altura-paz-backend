@@ -1,0 +1,14 @@
+import {test,before,after} from 'node:test';
+import assert from 'node:assert/strict';
+import ganache from 'ganache';
+import {BrowserProvider,ContractFactory,sha256,toUtf8Bytes,ZeroHash} from 'ethers';
+import {readFileSync} from 'node:fs';
+import '../scripts/compile-contract.mjs';
+let chain,provider,owner,stranger,registry;
+before(async()=>{chain=ganache.provider({logging:{quiet:true},chain:{chainId:31337,hardfork:'shanghai'}});provider=new BrowserProvider(chain);owner=await provider.getSigner(0);stranger=await provider.getSigner(1);const a=JSON.parse(readFileSync('deployments/artifact.json'));registry=await new ContractFactory(a.abi,a.bytecode,owner).deploy(await owner.getAddress());await registry.waitForDeployment();});
+after(async()=>{provider.destroy();await chain.disconnect();});
+test('el publicador registra una prueba consultable con recibo real',async()=>{const key=sha256(toUtf8Bytes('route:1')),digest=sha256(toUtf8Bytes('public snapshot'));const tx=await registry.register(key,digest);const receipt=await tx.wait();const proof=await registry.proofs(key);assert.equal(proof.digest,digest);assert.equal(proof.exists,true);assert.equal(proof.registeredBy,await owner.getAddress());assert.ok(receipt.hash);assert.ok(proof.timestamp>0n);});
+test('rechaza escrituras de cuentas ajenas',async()=>{await assert.rejects(async()=>{const tx=await registry.connect(stranger).register(sha256(toUtf8Bytes('unauthorized')),sha256(toUtf8Bytes('data')));await tx.wait();});});
+test('una versión registrada no se sobrescribe',async()=>{const key=sha256(toUtf8Bytes('immutable'));const tx=await registry.register(key,sha256(toUtf8Bytes('a')));await tx.wait();await assert.rejects(async()=>{await registry.register(key,sha256(toUtf8Bytes('b')));});});
+test('rechaza identificadores y huellas vacíos',async()=>{await assert.rejects(()=>registry.register(ZeroHash,sha256(toUtf8Bytes('a'))));await assert.rejects(()=>registry.register(sha256(toUtf8Bytes('empty')),ZeroHash));});
+test('traspaso de propiedad requiere aceptación del destinatario',async()=>{await(await registry.transferOwnership(await stranger.getAddress())).wait();assert.equal(await registry.owner(),await owner.getAddress());await(await registry.connect(stranger).acceptOwnership()).wait();assert.equal(await registry.owner(),await stranger.getAddress());});

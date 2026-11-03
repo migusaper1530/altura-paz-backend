@@ -1,0 +1,2162 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Altura Paz API",
+    "version": "0.1.0",
+    "description": "MVP académico SIS-215. GPX, rutas públicas, declaraciones manuales y auditoría de versiones. El mapa es conceptual. Contratos propios; proveedores GIS se documentan por separado."
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "Origen actual del gateway HTTP o HTTPS"
+    }
+  ],
+  "paths": {
+    "/api/auth/register": {
+      "post": {
+        "summary": "Crear cuenta de senderista",
+        "operationId": "post__auth_register",
+        "tags": [
+          "Identidad"
+        ],
+        "responses": {
+          "201": {
+            "description": "Operación correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error: 401 sesión, 403 permiso, 404 recurso, 409 conflicto, 422 validación, 429 cuota, 503 servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Register"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "summary": "Iniciar sesión",
+        "operationId": "post__auth_login",
+        "tags": [
+          "Identidad"
+        ],
+        "responses": {
+          "201": {
+            "description": "Operación correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error: 401 sesión, 403 permiso, 404 recurso, 409 conflicto, 422 validación, 429 cuota, 503 servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Login"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/me": {
+      "get": {
+        "summary": "Consultar mi perfil",
+        "operationId": "get__users_me",
+        "tags": [
+          "Identidad"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error: 401 sesión, 403 permiso, 404 recurso, 409 conflicto, 422 validación, 429 cuota, 503 servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": []
+      },
+      "patch": {
+        "summary": "Actualizar mi nombre",
+        "operationId": "patch__users_me",
+        "tags": [
+          "Identidad"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error: 401 sesión, 403 permiso, 404 recurso, 409 conflicto, 422 validación, 429 cuota, 503 servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Name"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/{userId}": {
+      "get": {
+        "summary": "Consultar nombre y perfil público de guía",
+        "operationId": "get__users_userId",
+        "tags": [
+          "Identidad"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error: 401 sesión, 403 permiso, 404 recurso, 409 conflicto, 422 validación, 429 cuota, 503 servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/api/guides/applications": {
+      "post": {
+        "summary": "Solicitar verificación de guía",
+        "operationId": "post__guides_applications",
+        "tags": [
+          "Identidad"
+        ],
+        "responses": {
+          "201": {
+            "description": "Operación correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error: 401 sesión, 403 permiso, 404 recurso, 409 conflicto, 422 validación, 429 cuota, 503 servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GuideApplication"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/guides/me": {
+      "patch": {
+        "summary": "Actualizar biografía profesional propia",
+        "operationId": "patch__guides_me",
+        "tags": [
+          "Identidad"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error: 401 sesión, 403 permiso, 404 recurso, 409 conflicto, 422 validación, 429 cuota, 503 servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GuideBio"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/guides": {
+      "get": {
+        "summary": "Solicitudes de guía pendientes",
+        "operationId": "get__admin_guides",
+        "tags": [
+          "Administración"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error: 401 sesión, 403 permiso, 404 recurso, 409 conflicto, 422 validación, 429 cuota, 503 servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": []
+      }
+    },
+    "/api/admin/guides/{userId}/review": {
+      "post": {
+        "summary": "Verificar o rechazar guía",
+        "operationId": "post__admin_guides_userId_review",
+        "tags": [
+          "Administración"
+        ],
+        "responses": {
+          "201": {
+            "description": "Operación correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error: 401 sesión, 403 permiso, 404 recurso, 409 conflicto, 422 validación, 429 cuota, 503 servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GuideReview"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/users/{userId}": {
+      "patch": {
+        "summary": "Habilitar o deshabilitar cuenta",
+        "operationId": "patch__admin_users_userId",
+        "tags": [
+          "Administración"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error: 401 sesión, 403 permiso, 404 recurso, 409 conflicto, 422 validación, 429 cuota, 503 servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Disabled"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/routes/import-gpx": {
+      "post": {
+        "summary": "Importar archivo GPX como borrador",
+        "operationId": "post__routes_import-gpx",
+        "tags": [
+          "Rutas y comunidad"
+        ],
+        "responses": {
+          "201": {
+            "description": "Operación correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Route"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error: 401 sesión, 403 permiso, 404 recurso, 409 conflicto, 422 validación, 429 cuota, 503 servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Enviar el contenido UTF-8 del archivo en gpx_content. No se conserva el archivo original ni sus timestamps o metadatos personales. Límite 5 MB y 100000 puntos. Se conservan segmentos independientes. Área piloto provisional: [-68.8,-17.3,-67.4,-15.6].",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportGpx"
+              },
+              "example": {
+                "name": "Palca · ejemplo sintético",
+                "description": "Solo demostración. No utilizar para navegar.",
+                "difficulty": "moderate",
+                "gpx_content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<gpx version=\"1.1\" creator=\"Altura Paz - ejemplo sintético, no navegar\" xmlns=\"http://www.topografix.com/GPX/1/1\">\n  <metadata><name>Palca - trazado ilustrativo</name><desc>Datos sintéticos para demostrar la importación. No es una ruta turística verificada.</desc></metadata>\n  <trk><name>Recorrido ilustrativo</name><trkseg>\n    <trkpt lat=\"-16.5570\" lon=\"-67.9560\"><ele>3400</ele></trkpt>\n    <trkpt lat=\"-16.5550\" lon=\"-67.9535\"><ele>3430</ele></trkpt>\n    <trkpt lat=\"-16.5518\" lon=\"-67.9520\"><ele>3470</ele></trkpt>\n    <trkpt lat=\"-16.5490\" lon=\"-67.9490\"><ele>3510</ele></trkpt>\n    <trkpt lat=\"-16.5457\" lon=\"-67.9470\"><ele>3550</ele></trkpt>\n    <trkpt lat=\"-16.5420\" lon=\"-67.9450\"><ele>3590</ele></trkpt>\n    <trkpt lat=\"-16.5390\" lon=\"-67.9420\"><ele>3580</ele></trkpt>\n    <trkpt lat=\"-16.5350\" lon=\"-67.9400\"><ele>3630</ele></trkpt>\n  </trkseg></trk>\n</gpx>\n"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/routes": {
+      "get": {
+        "summary": "Buscar rutas publicadas",
+        "operationId": "get__routes",
+        "tags": [
+          "Rutas y comunidad"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Route"
+                      }
+                    },
+                    "limit": {
+                      "type": "integer"
+                    },
+                    "offset": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error: 401 sesión, 403 permiso, 404 recurso, 409 conflicto, 422 validación, 429 cuota, 503 servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "difficulty",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "easy",
+                "moderate",
+                "hard"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "bbox",
+            "schema": {
+              "type": "string",
+              "example": "-68.3,-16.8,-67.7,-16.2"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "maximum": 100
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          }
+        ]
+      }
+    },
+    "/api/my/routes": {
+      "get": {
+        "summary": "Mis borradores y rutas publicadas",
+        "operationId": "get__my_routes",
+        "tags": [
+          "Rutas y comunidad"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Route"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error: 401 sesión, 403 permiso, 404 recurso, 409 conflicto, 422 validación, 429 cuota, 503 servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": []
+      }
+    },
+    "/api/routes/{routeId}": {
+      "get": {
+        "summary": "Consultar ruta sin incrementar visitas",
+        "operationId": "get__routes_routeId",
+        "tags": [
+          "Rutas y comunidad"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Route"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error: 401 sesión, 403 permiso, 404 recurso, 409 conflicto, 422 validación, 429 cuota, 503 servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "description": "Los borradores solo son visibles para su autor o administración mediante Bearer. Las rutas publicadas son públicas.",
+        "parameters": [
+          {
+            "name": "routeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      },
+      "patch": {
+        "summary": "Editar ruta propia o proponer cambio",
+        "operationId": "patch__routes_routeId",
+        "tags": [
+          "Rutas y comunidad"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error: 401 sesión, 403 permiso, 404 recurso, 409 conflicto, 422 validación, 429 cuota, 503 servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "expected_version evita sobrescribir cambios concurrentes. En rutas populares (>200 visitas) devuelve state=pending y revision_id; la versión pública permanece intacta. La popularidad es permanente una vez alcanzada.",
+        "parameters": [
+          {
+            "name": "routeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RouteChange"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/routes/{routeId}/publish": {
+      "post": {
+        "summary": "Publicar ruta propia",
+        "operationId": "post__routes_routeId_publish",
+        "tags": [
+          "Rutas y comunidad"
+        ],
+        "responses": {
+          "201": {
+            "description": "Operación correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Route"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error: 401 sesión, 403 permiso, 404 recurso, 409 conflicto, 422 validación, 429 cuota, 503 servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "routeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/api/routes/{routeId}/visits": {
+      "post": {
+        "summary": "Registrar visita de cuenta autenticada",
+        "operationId": "post__routes_routeId_visits",
+        "tags": [
+          "Rutas y comunidad"
+        ],
+        "responses": {
+          "201": {
+            "description": "Operación correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error: 401 sesión, 403 permiso, 404 recurso, 409 conflicto, 422 validación, 429 cuota, 503 servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Máximo una por cuenta/ruta/día en America/La_Paz; excluye autor. No equivale a personas únicas acumuladas ni a visitas anónimas.",
+        "parameters": [
+          {
+            "name": "routeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/api/routes/{routeId}/completion": {
+      "post": {
+        "summary": "Declarar que completé esta ruta",
+        "operationId": "post__routes_routeId_completion",
+        "tags": [
+          "Rutas y comunidad"
+        ],
+        "responses": {
+          "201": {
+            "description": "Operación correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error: 401 sesión, 403 permiso, 404 recurso, 409 conflicto, 422 validación, 429 cuota, 503 servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Idempotente por usuario y ruta. Sin prueba GPS. No expone identidades ni fechas de otros usuarios.",
+        "parameters": [
+          {
+            "name": "routeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Completion"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Retirar mi declaración",
+        "operationId": "delete__routes_routeId_completion",
+        "tags": [
+          "Rutas y comunidad"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error: 401 sesión, 403 permiso, 404 recurso, 409 conflicto, 422 validación, 429 cuota, 503 servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "routeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/api/my/activities": {
+      "get": {
+        "summary": "Consultar mis declaraciones privadas",
+        "operationId": "get__my_activities",
+        "tags": [
+          "Rutas y comunidad"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error: 401 sesión, 403 permiso, 404 recurso, 409 conflicto, 422 validación, 429 cuota, 503 servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": []
+      }
+    },
+    "/api/routes/{routeId}/comments": {
+      "post": {
+        "summary": "Añadir comments",
+        "operationId": "post__routes_routeId_comments",
+        "tags": [
+          "Rutas y comunidad"
+        ],
+        "responses": {
+          "201": {
+            "description": "Operación correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error: 401 sesión, 403 permiso, 404 recurso, 409 conflicto, 422 validación, 429 cuota, 503 servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "routeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Comment"
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Consultar comments",
+        "operationId": "get__routes_routeId_comments",
+        "tags": [
+          "Rutas y comunidad"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error: 401 sesión, 403 permiso, 404 recurso, 409 conflicto, 422 validación, 429 cuota, 503 servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "parameters": [
+          {
+            "name": "routeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/api/routes/{routeId}/reports": {
+      "post": {
+        "summary": "Añadir reports",
+        "operationId": "post__routes_routeId_reports",
+        "tags": [
+          "Rutas y comunidad"
+        ],
+        "responses": {
+          "201": {
+            "description": "Operación correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error: 401 sesión, 403 permiso, 404 recurso, 409 conflicto, 422 validación, 429 cuota, 503 servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "routeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Report"
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Consultar reports",
+        "operationId": "get__routes_routeId_reports",
+        "tags": [
+          "Rutas y comunidad"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error: 401 sesión, 403 permiso, 404 recurso, 409 conflicto, 422 validación, 429 cuota, 503 servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "parameters": [
+          {
+            "name": "routeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/api/routes/{routeId}/photos": {
+      "post": {
+        "summary": "Añadir photos",
+        "operationId": "post__routes_routeId_photos",
+        "tags": [
+          "Rutas y comunidad"
+        ],
+        "responses": {
+          "201": {
+            "description": "Operación correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error: 401 sesión, 403 permiso, 404 recurso, 409 conflicto, 422 validación, 429 cuota, 503 servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "routeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Photo"
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Consultar photos",
+        "operationId": "get__routes_routeId_photos",
+        "tags": [
+          "Rutas y comunidad"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error: 401 sesión, 403 permiso, 404 recurso, 409 conflicto, 422 validación, 429 cuota, 503 servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "parameters": [
+          {
+            "name": "routeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/api/photos/{photoId}/file": {
+      "get": {
+        "summary": "Descargar fotografía pública",
+        "operationId": "get__photos_photoId_file",
+        "tags": [
+          "Rutas y comunidad"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación correcta",
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error: 401 sesión, 403 permiso, 404 recurso, 409 conflicto, 422 validación, 429 cuota, 503 servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "parameters": [
+          {
+            "name": "photoId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/api/admin/revisions": {
+      "get": {
+        "summary": "Cambios de rutas populares pendientes",
+        "operationId": "get__admin_revisions",
+        "tags": [
+          "Administración"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error: 401 sesión, 403 permiso, 404 recurso, 409 conflicto, 422 validación, 429 cuota, 503 servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": []
+      }
+    },
+    "/api/admin/revisions/{revisionId}/review": {
+      "post": {
+        "summary": "Aprobar o rechazar cambio popular",
+        "operationId": "post__admin_revisions_revisionId_review",
+        "tags": [
+          "Administración"
+        ],
+        "responses": {
+          "201": {
+            "description": "Operación correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error: 401 sesión, 403 permiso, 404 recurso, 409 conflicto, 422 validación, 429 cuota, 503 servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "revisionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RevisionReview"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/reports": {
+      "get": {
+        "summary": "Reportes sin resolver",
+        "operationId": "get__admin_reports",
+        "tags": [
+          "Administración"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error: 401 sesión, 403 permiso, 404 recurso, 409 conflicto, 422 validación, 429 cuota, 503 servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": []
+      }
+    },
+    "/api/admin/reports/{reportId}/review": {
+      "post": {
+        "summary": "Revisar reporte publicado",
+        "operationId": "post__admin_reports_reportId_review",
+        "tags": [
+          "Administración"
+        ],
+        "responses": {
+          "201": {
+            "description": "Operación correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error: 401 sesión, 403 permiso, 404 recurso, 409 conflicto, 422 validación, 429 cuota, 503 servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "reportId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportReview"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/content/{kind}/{contentId}": {
+      "patch": {
+        "summary": "Ocultar o restituir contenido",
+        "operationId": "patch__admin_content_kind_contentId",
+        "tags": [
+          "Administración"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error: 401 sesión, 403 permiso, 404 recurso, 409 conflicto, 422 validación, 429 cuota, 503 servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "kind debe ser routes, comments o photos. Moderación posterior, no aprobación previa.",
+        "parameters": [
+          {
+            "name": "kind",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Hidden"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/routes/{routeId}/audit": {
+      "get": {
+        "summary": "Consultar huellas y recibos registrados",
+        "operationId": "get__routes_routeId_audit",
+        "tags": [
+          "Rutas y comunidad"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error: 401 sesión, 403 permiso, 404 recurso, 409 conflicto, 422 validación, 429 cuota, 503 servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "description": "Compara el contenido actual con el recibo de la base. La prueba independiente en cadena se consulta con /api/proofs/{proofId}.",
+        "parameters": [
+          {
+            "name": "routeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/api/proofs/{proofId}": {
+      "get": {
+        "summary": "Consultar prueba directamente en el contrato",
+        "operationId": "get__proofs_proofId",
+        "tags": [
+          "Rutas y comunidad"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error: 401 sesión, 403 permiso, 404 recurso, 409 conflicto, 422 validación, 429 cuota, 503 servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "description": "Retorna digest, exists, chain_id y contract_address. La red de la demostración es EVM local 31337, no Sepolia.",
+        "parameters": [
+          {
+            "name": "proofId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Register": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 12,
+            "maxLength": 128
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100
+          }
+        },
+        "required": [
+          "email",
+          "password",
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "Login": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ],
+        "additionalProperties": false
+      },
+      "ImportGpx": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 150
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 5000
+          },
+          "difficulty": {
+            "type": "string",
+            "enum": [
+              "easy",
+              "moderate",
+              "hard"
+            ]
+          },
+          "trail_status": {
+            "type": "string",
+            "enum": [
+              "unknown",
+              "open",
+              "caution",
+              "closed"
+            ]
+          },
+          "warnings": {
+            "type": "string",
+            "maxLength": 3000
+          },
+          "gpx_content": {
+            "type": "string",
+            "maxLength": 5242880
+          }
+        },
+        "required": [
+          "name",
+          "description",
+          "difficulty",
+          "gpx_content"
+        ],
+        "additionalProperties": false
+      },
+      "RouteChange": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 150
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 5000
+          },
+          "difficulty": {
+            "type": "string",
+            "enum": [
+              "easy",
+              "moderate",
+              "hard"
+            ]
+          },
+          "trail_status": {
+            "type": "string",
+            "enum": [
+              "unknown",
+              "open",
+              "caution",
+              "closed"
+            ]
+          },
+          "warnings": {
+            "type": "string",
+            "maxLength": 3000
+          },
+          "gpx_content": {
+            "type": "string",
+            "maxLength": 5242880
+          },
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "expected_version"
+        ],
+        "additionalProperties": false
+      },
+      "Route": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "author_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 150
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 5000
+          },
+          "difficulty": {
+            "type": "string",
+            "enum": [
+              "easy",
+              "moderate",
+              "hard"
+            ]
+          },
+          "trail_status": {
+            "type": "string",
+            "enum": [
+              "unknown",
+              "open",
+              "caution",
+              "closed"
+            ]
+          },
+          "warnings": {
+            "type": "string",
+            "maxLength": 3000
+          },
+          "geometry": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "MultiLineString"
+                ]
+              },
+              "coordinates": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "minItems": 2,
+                    "maxItems": 2,
+                    "description": "[longitud, latitud] en WGS84"
+                  }
+                }
+              }
+            }
+          },
+          "distance_m": {
+            "type": "number"
+          },
+          "ascent_m": {
+            "type": "number",
+            "nullable": true
+          },
+          "descent_m": {
+            "type": "number",
+            "nullable": true
+          },
+          "estimated_minutes": {
+            "type": "integer"
+          },
+          "elevation_source": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "published"
+            ]
+          },
+          "version": {
+            "type": "integer"
+          },
+          "views": {
+            "type": "integer"
+          },
+          "popular": {
+            "type": "boolean"
+          },
+          "completed_people": {
+            "type": "integer"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Completion": {
+        "type": "object",
+        "properties": {
+          "completed_on": {
+            "type": "string",
+            "format": "date"
+          }
+        },
+        "required": [
+          "completed_on"
+        ],
+        "additionalProperties": false
+      },
+      "Comment": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "location": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 2,
+            "maxItems": 2,
+            "description": "[longitud, latitud] en WGS84"
+          }
+        },
+        "required": [
+          "body"
+        ],
+        "additionalProperties": false
+      },
+      "Report": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string",
+            "enum": [
+              "obstacle",
+              "closure",
+              "hazard",
+              "content"
+            ]
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 3000
+          },
+          "location": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 2,
+            "maxItems": 2,
+            "description": "[longitud, latitud] en WGS84"
+          }
+        },
+        "required": [
+          "category",
+          "body",
+          "location"
+        ],
+        "additionalProperties": false
+      },
+      "Photo": {
+        "type": "object",
+        "properties": {
+          "image_base64": {
+            "type": "string",
+            "description": "JPEG/PNG/WebP codificado base64, máximo 5 MB sin codificar; se elimina EXIF"
+          },
+          "caption": {
+            "type": "string",
+            "maxLength": 300
+          }
+        },
+        "required": [
+          "image_base64",
+          "caption"
+        ],
+        "additionalProperties": false
+      },
+      "GuideApplication": {
+        "type": "object",
+        "properties": {
+          "bio": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "credential_reference": {
+            "type": "string",
+            "maxLength": 200
+          }
+        },
+        "required": [
+          "bio",
+          "credential_reference"
+        ],
+        "additionalProperties": false
+      },
+      "GuideBio": {
+        "type": "object",
+        "properties": {
+          "bio": {
+            "type": "string",
+            "maxLength": 2000
+          }
+        },
+        "required": [
+          "bio"
+        ],
+        "additionalProperties": false
+      },
+      "GuideReview": {
+        "type": "object",
+        "properties": {
+          "approve": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "approve"
+        ],
+        "additionalProperties": false
+      },
+      "RevisionReview": {
+        "type": "object",
+        "properties": {
+          "approve": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "approve",
+          "reason"
+        ],
+        "additionalProperties": false
+      },
+      "ReportReview": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "confirmed",
+              "resolved",
+              "dismissed"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "status",
+          "reason"
+        ],
+        "additionalProperties": false
+      },
+      "Hidden": {
+        "type": "object",
+        "properties": {
+          "hidden": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "hidden"
+        ],
+        "additionalProperties": false
+      },
+      "Disabled": {
+        "type": "object",
+        "properties": {
+          "disabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "disabled"
+        ],
+        "additionalProperties": false
+      },
+      "Name": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {},
+          "status": {
+            "type": "integer"
+          },
+          "request_id": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

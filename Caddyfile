@@ -1,0 +1,9 @@
+{
+  auto_https disable_redirects
+}
+https://localhost:8443 {
+  tls internal {
+    protocols tls1.3
+  }
+  reverse_proxy gateway:3000
+}

@@ -1,0 +1,764 @@
+{
+  "info": {
+    "name": "Altura Paz · API MVP",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8088"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "email",
+      "value": ""
+    },
+    {
+      "key": "password",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Crear cuenta de senderista",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/auth/register",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"senderista@example.test\",\n  \"password\": \"Ejemplo-largo-12345\",\n  \"name\": \"Senderista de prueba\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Iniciar sesión",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const body=pm.response.json();",
+              "if(body.access_token) pm.collectionVariables.set(\"token\",body.access_token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Consultar mi perfil",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/users/me",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Actualizar mi nombre",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/users/me",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Por completar\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Consultar nombre y perfil público de guía",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/users/{userId}"
+      }
+    },
+    {
+      "name": "Solicitar verificación de guía",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/guides/applications",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"bio\": \"Por completar\",\n  \"credential_reference\": \"Por completar\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Actualizar biografía profesional propia",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/guides/me",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"bio\": \"Por completar\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Solicitudes de guía pendientes",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/admin/guides",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Verificar o rechazar guía",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/admin/guides/{userId}/review",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"approve\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Habilitar o deshabilitar cuenta",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/admin/users/{userId}",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"disabled\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Importar archivo GPX como borrador",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/routes/import-gpx",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Palca · ejemplo sintético\",\n  \"description\": \"Solo demostración. No utilizar para navegar.\",\n  \"difficulty\": \"moderate\",\n  \"gpx_content\": \"<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\"?>\\n<gpx version=\\\"1.1\\\" creator=\\\"Altura Paz - ejemplo sintético, no navegar\\\" xmlns=\\\"http://www.topografix.com/GPX/1/1\\\">\\n  <metadata><name>Palca - trazado ilustrativo</name><desc>Datos sintéticos para demostrar la importación. No es una ruta turística verificada.</desc></metadata>\\n  <trk><name>Recorrido ilustrativo</name><trkseg>\\n    <trkpt lat=\\\"-16.5570\\\" lon=\\\"-67.9560\\\"><ele>3400</ele></trkpt>\\n    <trkpt lat=\\\"-16.5550\\\" lon=\\\"-67.9535\\\"><ele>3430</ele></trkpt>\\n    <trkpt lat=\\\"-16.5518\\\" lon=\\\"-67.9520\\\"><ele>3470</ele></trkpt>\\n    <trkpt lat=\\\"-16.5490\\\" lon=\\\"-67.9490\\\"><ele>3510</ele></trkpt>\\n    <trkpt lat=\\\"-16.5457\\\" lon=\\\"-67.9470\\\"><ele>3550</ele></trkpt>\\n    <trkpt lat=\\\"-16.5420\\\" lon=\\\"-67.9450\\\"><ele>3590</ele></trkpt>\\n    <trkpt lat=\\\"-16.5390\\\" lon=\\\"-67.9420\\\"><ele>3580</ele></trkpt>\\n    <trkpt lat=\\\"-16.5350\\\" lon=\\\"-67.9400\\\"><ele>3630</ele></trkpt>\\n  </trkseg></trk>\\n</gpx>\\n\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Buscar rutas publicadas",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/routes"
+      }
+    },
+    {
+      "name": "Mis borradores y rutas publicadas",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/my/routes",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Consultar ruta sin incrementar visitas",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/routes/{routeId}"
+      }
+    },
+    {
+      "name": "Editar ruta propia o proponer cambio",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/routes/{routeId}",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"expected_version\": 1,\n  \"name\": \"Nombre actualizado\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Publicar ruta propia",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/api/routes/{routeId}/publish",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Registrar visita de cuenta autenticada",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/api/routes/{routeId}/visits",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Declarar que completé esta ruta",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/routes/{routeId}/completion",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"completed_on\": \"2026-11-03\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Retirar mi declaración",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{base_url}}/api/routes/{routeId}/completion",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Consultar mis declaraciones privadas",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/my/activities",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Añadir comments",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/routes/{routeId}/comments",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"body\": \"Por completar\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Consultar comments",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/routes/{routeId}/comments"
+      }
+    },
+    {
+      "name": "Añadir reports",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/routes/{routeId}/reports",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"category\": \"Por completar\",\n  \"body\": \"Por completar\",\n  \"location\": [\n    -67.956,\n    -16.557\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Consultar reports",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/routes/{routeId}/reports"
+      }
+    },
+    {
+      "name": "Añadir photos",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/routes/{routeId}/photos",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"image_base64\": \"Por completar\",\n  \"caption\": \"Por completar\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Consultar photos",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/routes/{routeId}/photos"
+      }
+    },
+    {
+      "name": "Descargar fotografía pública",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/photos/{photoId}/file"
+      }
+    },
+    {
+      "name": "Cambios de rutas populares pendientes",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/admin/revisions",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Aprobar o rechazar cambio popular",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/admin/revisions/{revisionId}/review",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"approve\": true,\n  \"reason\": \"Por completar\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Reportes sin resolver",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/admin/reports",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Revisar reporte publicado",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/admin/reports/{reportId}/review",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"Por completar\",\n  \"reason\": \"Por completar\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Ocultar o restituir contenido",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/admin/content/{kind}/{contentId}",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"hidden\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Consultar huellas y recibos registrados",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/routes/{routeId}/audit"
+      }
+    },
+    {
+      "name": "Consultar prueba directamente en el contrato",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/proofs/{proofId}"
+      }
+    }
+  ]
+}

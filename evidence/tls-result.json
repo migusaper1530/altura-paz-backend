@@ -1,0 +1,6 @@
+{
+  "negotiated": "TLSv1.3",
+  "certificate_verified": true,
+  "tls12_rejected": true,
+  "run_at": "2026-11-03T14:27:37.524637+00:00"
+}

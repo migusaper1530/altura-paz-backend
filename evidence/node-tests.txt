@@ -1,0 +1,86 @@
+ Container altura-paz-qa-run-00ee404a8dfd Creating 
+ Container altura-paz-qa-run-00ee404a8dfd Created 
+
+> altura-paz-backend@0.1.0 test:coverage
+> jest --runInBand --coverage
+
+[Nest] 18  - 11/03/2026, 2:40:31 PM     LOG [NestFactory] Starting Nest application...
+[Nest] 18  - 11/03/2026, 2:40:31 PM     LOG [InstanceLoader] AppModule dependencies initialized +11ms
+[Nest] 18  - 11/03/2026, 2:40:31 PM     LOG [RoutesResolver] HealthController {/}: +4ms
+[Nest] 18  - 11/03/2026, 2:40:31 PM     LOG [RouterExplorer] Mapped {/health, GET} route +2ms
+[Nest] 18  - 11/03/2026, 2:40:31 PM     LOG [RoutesResolver] IdentityController {/api}: +0ms
+[Nest] 18  - 11/03/2026, 2:40:31 PM     LOG [RouterExplorer] Mapped {/api/guides/me, PATCH} route +1ms
+[Nest] 18  - 11/03/2026, 2:40:31 PM     LOG [RouterExplorer] Mapped {/api/auth/register, POST} route +0ms
+[Nest] 18  - 11/03/2026, 2:40:31 PM     LOG [RouterExplorer] Mapped {/api/auth/login, POST} route +0ms
+[Nest] 18  - 11/03/2026, 2:40:31 PM     LOG [RouterExplorer] Mapped {/api/users/me, GET} route +1ms
+[Nest] 18  - 11/03/2026, 2:40:31 PM     LOG [RouterExplorer] Mapped {/api/users/me, PATCH} route +0ms
+[Nest] 18  - 11/03/2026, 2:40:31 PM     LOG [RouterExplorer] Mapped {/api/users/:userId, GET} route +1ms
+[Nest] 18  - 11/03/2026, 2:40:31 PM     LOG [RouterExplorer] Mapped {/api/guides/applications, POST} route +0ms
+[Nest] 18  - 11/03/2026, 2:40:31 PM     LOG [RouterExplorer] Mapped {/api/admin/guides, GET} route +2ms
+[Nest] 18  - 11/03/2026, 2:40:31 PM     LOG [RouterExplorer] Mapped {/api/admin/guides/:userId/review, POST} route +0ms
+[Nest] 18  - 11/03/2026, 2:40:31 PM     LOG [RouterExplorer] Mapped {/api/admin/users/:userId, PATCH} route +0ms
+[Nest] 18  - 11/03/2026, 2:40:32 PM     LOG [NestApplication] Nest application successfully started +63ms
+[Nest] 18  - 11/03/2026, 2:40:32 PM     LOG [NestFactory] Starting Nest application... +2ms
+[Nest] 18  - 11/03/2026, 2:40:32 PM     LOG [InstanceLoader] AppModule dependencies initialized +3ms
+[Nest] 18  - 11/03/2026, 2:40:32 PM     LOG [RoutesResolver] HealthController {/}: +0ms
+[Nest] 18  - 11/03/2026, 2:40:32 PM     LOG [RouterExplorer] Mapped {/health, GET} route +1ms
+[Nest] 18  - 11/03/2026, 2:40:32 PM     LOG [RoutesResolver] TrailsController {/api}: +0ms
+[Nest] 18  - 11/03/2026, 2:40:32 PM     LOG [RouterExplorer] Mapped {/api/routes/import-gpx, POST} route +0ms
+[Nest] 18  - 11/03/2026, 2:40:32 PM     LOG [RouterExplorer] Mapped {/api/routes, GET} route +0ms
+[Nest] 18  - 11/03/2026, 2:40:32 PM     LOG [RouterExplorer] Mapped {/api/my/routes, GET} route +0ms
+[Nest] 18  - 11/03/2026, 2:40:32 PM     LOG [RouterExplorer] Mapped {/api/routes/:routeId, GET} route +1ms
+[Nest] 18  - 11/03/2026, 2:40:32 PM     LOG [RouterExplorer] Mapped {/api/routes/:routeId/publish, POST} route +0ms
+[Nest] 18  - 11/03/2026, 2:40:32 PM     LOG [RouterExplorer] Mapped {/api/routes/:routeId, PATCH} route +0ms
+[Nest] 18  - 11/03/2026, 2:40:32 PM     LOG [RouterExplorer] Mapped {/api/routes/:routeId/visits, POST} route +0ms
+[Nest] 18  - 11/03/2026, 2:40:32 PM     LOG [RouterExplorer] Mapped {/api/routes/:routeId/completion, POST} route +0ms
+[Nest] 18  - 11/03/2026, 2:40:32 PM     LOG [RouterExplorer] Mapped {/api/routes/:routeId/completion, DELETE} route +1ms
+[Nest] 18  - 11/03/2026, 2:40:32 PM     LOG [RouterExplorer] Mapped {/api/my/activities, GET} route +0ms
+[Nest] 18  - 11/03/2026, 2:40:32 PM     LOG [RouterExplorer] Mapped {/api/routes/:routeId/comments, POST} route +0ms
+[Nest] 18  - 11/03/2026, 2:40:32 PM     LOG [RouterExplorer] Mapped {/api/routes/:routeId/comments, GET} route +0ms
+[Nest] 18  - 11/03/2026, 2:40:32 PM     LOG [RouterExplorer] Mapped {/api/routes/:routeId/reports, POST} route +0ms
+[Nest] 18  - 11/03/2026, 2:40:32 PM     LOG [RouterExplorer] Mapped {/api/routes/:routeId/reports, GET} route +0ms
+[Nest] 18  - 11/03/2026, 2:40:32 PM     LOG [RouterExplorer] Mapped {/api/admin/revisions, GET} route +1ms
+[Nest] 18  - 11/03/2026, 2:40:32 PM     LOG [RouterExplorer] Mapped {/api/admin/revisions/:revisionId/review, POST} route +0ms
+[Nest] 18  - 11/03/2026, 2:40:32 PM     LOG [RouterExplorer] Mapped {/api/admin/reports, GET} route +0ms
+[Nest] 18  - 11/03/2026, 2:40:32 PM     LOG [RouterExplorer] Mapped {/api/admin/reports/:reportId/review, POST} route +0ms
+[Nest] 18  - 11/03/2026, 2:40:32 PM     LOG [RouterExplorer] Mapped {/api/admin/content/:kind/:contentId, PATCH} route +0ms
+[Nest] 18  - 11/03/2026, 2:40:32 PM     LOG [RouterExplorer] Mapped {/api/routes/:routeId/photos, POST} route +0ms
+[Nest] 18  - 11/03/2026, 2:40:32 PM     LOG [RouterExplorer] Mapped {/api/routes/:routeId/photos, GET} route +1ms
+[Nest] 18  - 11/03/2026, 2:40:32 PM     LOG [RouterExplorer] Mapped {/api/photos/:photoId/file, GET} route +0ms
+[Nest] 18  - 11/03/2026, 2:40:32 PM     LOG [RouterExplorer] Mapped {/api/routes/:routeId/audit, GET} route +0ms
+[Nest] 18  - 11/03/2026, 2:40:32 PM     LOG [NestApplication] Nest application successfully started +1ms
+[Nest] 18  - 11/03/2026, 2:40:32 PM     LOG [NestFactory] Starting Nest application... +0ms
+[Nest] 18  - 11/03/2026, 2:40:32 PM     LOG [InstanceLoader] AppModule dependencies initialized +2ms
+[Nest] 18  - 11/03/2026, 2:40:32 PM     LOG [RoutesResolver] HealthController {/}: +1ms
+[Nest] 18  - 11/03/2026, 2:40:32 PM     LOG [RouterExplorer] Mapped {/health, GET} route +0ms
+[Nest] 18  - 11/03/2026, 2:40:32 PM     LOG [RoutesResolver] GatewayController {/}: +0ms
+[Nest] 18  - 11/03/2026, 2:40:32 PM     LOG [RouterExplorer] Mapped {/, GET} route +0ms
+[Nest] 18  - 11/03/2026, 2:40:32 PM     LOG [RouterExplorer] Mapped {/concepto.svg, GET} route +1ms
+[Nest] 18  - 11/03/2026, 2:40:32 PM     LOG [RouterExplorer] Mapped {/openapi.json, GET} route +0ms
+[Nest] 18  - 11/03/2026, 2:40:32 PM     LOG [RouterExplorer] Mapped {/docs, GET} route +0ms
+[Nest] 18  - 11/03/2026, 2:40:32 PM     LOG [RouterExplorer] Mapped {/api/*path, ALL} route +0ms
+[Nest] 18  - 11/03/2026, 2:40:32 PM     LOG [NestApplication] Nest application successfully started +3ms
+PASS test/workflow.spec.ts (6.969 s)
+PASS test/ledger.spec.ts
+PASS test/core.spec.ts
+PASS test/transport.spec.ts
+PASS test/cache.spec.ts
+--------------|---------|----------|---------|---------|----------------------------
+File          | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s          
+--------------|---------|----------|---------|---------|----------------------------
+All files     |   96.31 |    84.12 |   96.25 |   96.78 |                            
+ cache.ts     |     100 |      100 |     100 |     100 |                            
+ core.ts      |     100 |      100 |     100 |     100 |                            
+ gateway.ts   |   98.48 |    88.88 |     100 |     100 | 51,59,87,111,114           
+ identity.ts  |   95.93 |    74.35 |     100 |   96.49 | 85,104,207,227             
+ ledger.ts    |   92.62 |    88.37 |      70 |   92.52 | 99,113,156-158,163,241,243 
+ main.ts      |    87.8 |    66.66 |      75 |   89.18 | 69,74,95-96                
+ trails.ts    |   96.88 |    77.55 |     100 |   97.44 | 253,360-369,513,590,596    
+ transport.ts |     100 |      100 |     100 |     100 |                            
+--------------|---------|----------|---------|---------|----------------------------
+
+Test Suites: 5 passed, 5 total
+Tests:       31 passed, 31 total
+Snapshots:   0 total
+Time:        9.51 s
+Ran all test suites.

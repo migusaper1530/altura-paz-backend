@@ -1,0 +1,69 @@
+{
+  "name": "altura-paz-backend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MVP académico GIS para rutas públicas alrededor de La Paz",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/main.js",
+    "lint": "tsc --noEmit -p tsconfig.json",
+    "test": "jest --runInBand",
+    "test:coverage": "jest --runInBand --coverage",
+    "contract:compile": "node scripts/compile-contract.mjs",
+    "contract:deploy": "node scripts/deploy-contract.mjs",
+    "contract:test": "node --test test/contract.test.mjs",
+    "demo": "node scripts/demo.mjs",
+    "integration": "jest --runInBand test/workflow.spec.ts"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11.2.8",
+    "@nestjs/core": "^11.2.8",
+    "@nestjs/platform-express": "^11.2.8",
+    "@openzeppelin/contracts": "^5.6.1",
+    "amqplib": "^0.10.9",
+    "ethers": "^6.15.0",
+    "express": "^5.1.0",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.16.3",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2",
+    "sharp": "^0.34.4",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@types/amqplib": "^0.10.7",
+    "@types/express": "^5.0.3",
+    "@types/jest": "^30.0.0",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^24.10.0",
+    "@types/pg": "^8.15.6",
+    "ganache": "^7.9.2",
+    "jest": "^30.2.0",
+    "solc": "0.8.38",
+    "ts-jest": "^29.4.5",
+    "typescript": "^5.9.3"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/test/*.spec.ts"
+    ],
+    "collectCoverageFrom": [
+      "src/**/*.ts"
+    ],
+    "coverageDirectory": "evidence/coverage-node",
+    "coverageThreshold": {
+      "global": {
+        "branches": 76,
+        "functions": 76,
+        "lines": 76,
+        "statements": 76
+      }
+    }
+  }
+}

@@ -1,0 +1,197 @@
+name: altura-paz
+x-app: &app
+  build: { context: ., target: runtime }
+  image: altura-paz-app:local
+  restart: unless-stopped
+  networks: [backend]
+  mem_limit: 320m
+  environment: &common
+    JWT_SECRET: ${JWT_SECRET:?Configura .env con scripts/setup.mjs}
+    PORT: 3000
+services:
+  db:
+    image: postgis/postgis:17-3.5
+    environment:
+      {
+        POSTGRES_USER: altura_migrator,
+        POSTGRES_DB: altura,
+        POSTGRES_PASSWORD: "${DB_PASSWORD:?Configura DB_PASSWORD}",
+      }
+    volumes:
+      [
+        "db-data:/var/lib/postgresql/data",
+        "./db:/docker-entrypoint-initdb.d:ro",
+      ]
+    networks: [backend]
+    mem_limit: 512m
+    healthcheck:
+      {
+        test: ["CMD-SHELL", "pg_isready -U altura_migrator -d altura"],
+        interval: 3s,
+        timeout: 3s,
+        retries: 30,
+      }
+  rabbit:
+    image: rabbitmq:4-alpine
+    environment:
+      { RABBITMQ_DEFAULT_USER: altura, RABBITMQ_DEFAULT_PASS: "${DB_PASSWORD}" }
+    volumes: ["rabbit-data:/var/lib/rabbitmq"]
+    networks: [backend]
+    mem_limit: 384m
+    healthcheck:
+      {
+        test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"],
+        interval: 5s,
+        timeout: 5s,
+        retries: 30,
+      }
+  chain:
+    build: { context: ., target: tools }
+    image: altura-paz-tools:local
+    command:
+      [
+        "node_modules/.bin/ganache",
+        "--server.host",
+        "0.0.0.0",
+        "--chain.chainId",
+        "31337",
+        "--wallet.deterministic",
+        "--database.dbPath",
+        "/chain",
+        "--logging.quiet",
+      ]
+    volumes: ["chain-data:/chain"]
+    networks: [backend]
+    mem_limit: 384m
+    # Red local desechable. Ningún puerto RPC queda expuesto al host.
+    healthcheck:
+      {
+        test:
+          [
+            "CMD",
+            "node",
+            "-e",
+            "fetch('http://localhost:8545',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',method:'eth_chainId',params:[],id:1})}).then(r=>{if(!r.ok)process.exit(1)})",
+          ],
+        interval: 3s,
+        timeout: 3s,
+        retries: 30,
+      }
+  deploy:
+    image: altura-paz-tools:local
+    build: { context: ., target: tools }
+    command: ["node", "scripts/deploy-contract.mjs"]
+    environment: { RPC_URL: "http://chain:8545" }
+    volumes: ["deployments:/app/deployments"]
+    networks: [backend]
+    mem_limit: 256m
+    depends_on: { chain: { condition: service_healthy } }
+    restart: "no"
+  identity:
+    <<: *app
+    environment:
+      <<: *common
+      SERVICE_MODE: identity
+      DATABASE_URL: postgres://altura_identity:${DB_PASSWORD}@db:5432/altura
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@example.test}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Configura ADMIN_PASSWORD}
+    depends_on: { db: { condition: service_healthy } }
+  gis:
+    build: { context: ./gis }
+    image: altura-paz-gis:local
+    networks: [backend]
+    mem_limit: 384m
+    restart: unless-stopped
+  trails:
+    <<: *app
+    environment:
+      <<: *common
+      SERVICE_MODE: trails
+      DATABASE_URL: postgres://altura_trails:${DB_PASSWORD}@db:5432/altura
+      VISIT_SECRET: ${VISIT_SECRET:?Configura VISIT_SECRET}
+      GIS_URL: http://gis:8081
+      RABBITMQ_URL: amqp://altura:${DB_PASSWORD}@rabbit:5672
+      MEDIA_DIR: /app/media
+    volumes: ["media:/app/media"]
+    depends_on:
+      {
+        db: { condition: service_healthy },
+        rabbit: { condition: service_healthy },
+        gis: { condition: service_started },
+      }
+  ledger:
+    <<: *app
+    environment:
+      <<: *common
+      SERVICE_MODE: ledger
+      DATABASE_URL: postgres://altura_ledger:${DB_PASSWORD}@db:5432/altura
+      RABBITMQ_URL: amqp://altura:${DB_PASSWORD}@rabbit:5672
+      RPC_URL: http://chain:8545
+      DEPLOYMENT_FILE: /app/deployments/local.json
+    volumes: ["deployments:/app/deployments:ro"]
+    depends_on:
+      {
+        deploy: { condition: service_completed_successfully },
+        db: { condition: service_healthy },
+        rabbit: { condition: service_healthy },
+      }
+  gateway:
+    <<: *app
+    environment:
+      <<: *common
+      SERVICE_MODE: gateway
+      IDENTITY_URL: http://identity:3000
+      TRAILS_URL: http://trails:3000
+      LEDGER_URL: http://ledger:3000
+      AUTH_RATE_LIMIT: ${AUTH_RATE_LIMIT:-20}
+      API_RATE_LIMIT: ${API_RATE_LIMIT:-600}
+    ports: ["127.0.0.1:8088:3000"]
+    depends_on: [identity, trails, ledger]
+  qa:
+    profiles: [qa]
+    image: altura-paz-tools:local
+    build: { context: ., target: tools }
+    command: ["npm", "run", "test:coverage"]
+    environment:
+      TEST_DB_HOST: db
+      TEST_DB_PASSWORD: ${DB_PASSWORD}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@example.test}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      GIS_URL: http://gis:8081
+      LEDGER_URL: http://ledger:3000
+      RABBITMQ_URL: amqp://altura:${DB_PASSWORD}@rabbit:5672
+      RPC_URL: http://chain:8545
+    volumes:
+      [
+        "./evidence:/app/evidence",
+        "./test:/app/test:ro",
+        "./src:/app/src:ro",
+        "./docs:/app/docs:ro",
+        "./public:/app/public:ro",
+        "deployments:/app/deployments:ro",
+      ]
+    networks: [backend]
+    mem_limit: 768m
+  tls:
+    profiles: [tls]
+    image: caddy:2-alpine
+    volumes:
+      [
+        "./Caddyfile:/etc/caddy/Caddyfile:ro",
+        "caddy-data:/data",
+        "caddy-config:/config",
+      ]
+    ports: ["127.0.0.1:8443:8443"]
+    networks: [backend]
+    mem_limit: 128m
+    depends_on: [gateway]
+volumes:
+  db-data: {}
+  rabbit-data: {}
+  media: {}
+  chain-data: {}
+  deployments: {}
+  caddy-data: {}
+  caddy-config: {}
+networks:
+  backend: {}
