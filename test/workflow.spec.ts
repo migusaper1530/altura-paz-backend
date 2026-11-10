@@ -67,6 +67,7 @@ suite("flujos con PostgreSQL/PostGIS, GIS y HTTP reales", () => {
       name: "Autora QA",
     });
     expect(a.status).toBe(201);
+    expect(a.body.user.role).toBe("tourist");
     author = { ...a.body.user, token: a.body.access_token };
     const b = await call("POST", "/api/auth/register", {
       email: `b-${tag}@example.test`,
@@ -128,6 +129,21 @@ suite("flujos con PostgreSQL/PostGIS, GIS y HTTP reales", () => {
     expect(p.body).not.toHaveProperty("email");
     expect(p.body.name).toBe("Autora actualizada");
     expect((await call("GET", "/api/users/" + randomUUID())).status).toBe(404);
+  });
+  test("perfil de empresa accesible a través del gateway", async () => {
+    const org = await call("POST", "/api/auth/register", {
+      email: `org-${tag}@example.test`, password, name: "Grupo de prueba",
+      role: "organization", organization_name: "Grupo QA", organization_type: "group",
+    });
+    expect(org.status).toBe(201);
+    expect((await call("PATCH", "/api/organizations/me", { description: "Descripción pública" }, org.body.access_token)).status).toBe(200);
+    expect((await call("GET", "/api/users/" + org.body.user.id)).body.organization_description).toBe("Descripción pública");
+    const imported = await call("POST", "/api/routes/import-gpx", {
+      name: "Ruta de grupo", description: "Ruta sintética de organización", difficulty: "easy",
+      gpx_content: await readFile("examples/palca-ilustrativo.gpx", "utf8"),
+    }, org.body.access_token);
+    expect(imported.status).toBe(201);
+    expect((await call("POST", `/api/routes/${imported.body.id}/publish`, undefined, org.body.access_token)).status).toBe(201);
   });
   test("importación, borrador y publicación pública con outbox", async () => {
     const gpx = await readFile("examples/palca-ilustrativo.gpx", "utf8");

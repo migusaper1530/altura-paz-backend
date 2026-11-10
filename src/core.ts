@@ -18,7 +18,8 @@ import {
 import jwt from "jsonwebtoken";
 import { z } from "zod";
 
-export type User = { sub: string; role: "hiker" | "guide" | "admin" };
+export type UserRole = "tourist" | "guide" | "organization" | "admin";
+export type User = { sub: string; role: UserRole };
 export type Queryable = Pick<PoolClient, "query">;
 export const uuid = z.string().uuid();
 export const id = (value: string) => uuid.parse(value);
@@ -39,7 +40,10 @@ export function auth(header?: string, role?: User["role"]): User {
       audience: "altura-api",
     }) as User;
     uuid.parse(user.sub);
-    if (!["hiker", "guide", "admin"].includes(user.role)) throw new Error();
+    // Compatibilidad durante los 15 minutos de vigencia de sesiones anteriores.
+    if ((user.role as string) === "hiker") user.role = "tourist";
+    if (!["tourist", "guide", "organization", "admin"].includes(user.role))
+      throw new Error();
     if (role && user.role !== role)
       throw new ForbiddenException("Permiso insuficiente");
     return user;

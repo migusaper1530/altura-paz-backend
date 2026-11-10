@@ -28,7 +28,7 @@ class HealthController {
     return {
       status: "ok",
       service: process.env.SERVICE_MODE || "gateway",
-      version: "0.1.0",
+      version: "0.2.0",
     };
   }
 }

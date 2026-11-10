@@ -23,7 +23,7 @@
   ],
   "item": [
     {
-      "name": "Crear cuenta de senderista",
+      "name": "Crear cuenta de turista",
       "request": {
         "method": "POST",
         "header": [
@@ -35,7 +35,7 @@
         "url": "{{base_url}}/api/auth/register",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"email\": \"senderista@example.test\",\n  \"password\": \"Ejemplo-largo-12345\",\n  \"name\": \"Senderista de prueba\"\n}",
+          "raw": "{\n  \"email\": \"turista@example.test\",\n  \"password\": \"Ejemplo-largo-12345\",\n  \"name\": \"Turista de prueba\",\n  \"role\": \"tourist\"\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -758,6 +758,124 @@
         "method": "GET",
         "header": [],
         "url": "{{base_url}}/api/proofs/{proofId}"
+      }
+    },
+    {
+      "name": "Crear cuenta de guia",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/auth/register",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"guia@example.test\",\n  \"password\": \"Ejemplo-largo-12345\",\n  \"name\": \"Guía de prueba\",\n  \"role\": \"guide\",\n  \"bio\": \"Guía de montaña\",\n  \"credential_reference\": \"REFERENCIA-DE-PRUEBA\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Crear cuenta de empresa",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/auth/register",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"empresa@example.test\",\n  \"password\": \"Ejemplo-largo-12345\",\n  \"name\": \"Responsable de empresa\",\n  \"role\": \"organization\",\n  \"organization_name\": \"Empresa de turismo\",\n  \"organization_type\": \"company\",\n  \"description\": \"Rutas de senderismo\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Crear cuenta de grupo",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/auth/register",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"grupo@example.test\",\n  \"password\": \"Ejemplo-largo-12345\",\n  \"name\": \"Responsable de grupo\",\n  \"role\": \"organization\",\n  \"organization_name\": \"Grupo de montaña\",\n  \"organization_type\": \"group\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Actualizar empresa/grupo propio",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/api/organizations/me",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"description\": \"Perfil actualizado\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Crear administrador (solo administración)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/api/admin/users",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"administracion@example.test\",\n  \"password\": \"Ejemplo-largo-12345\",\n  \"name\": \"Administración\",\n  \"role\": \"admin\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
       }
     }
   ]

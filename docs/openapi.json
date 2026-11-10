@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Altura Paz API",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "description": "MVP académico SIS-215. GPX, rutas públicas, declaraciones manuales y auditoría de versiones. El mapa es conceptual. Contratos propios; proveedores GIS se documentan por separado."
   },
   "servers": [
@@ -14,7 +14,7 @@
   "paths": {
     "/api/auth/register": {
       "post": {
-        "summary": "Crear cuenta de senderista",
+        "summary": "Crear cuenta de turista, guía o empresa/grupo",
         "operationId": "post__auth_register",
         "tags": [
           "Identidad"
@@ -49,10 +49,52 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/Register"
+              },
+              "examples": {
+                "turista": {
+                  "value": {
+                    "email": "turista@example.test",
+                    "password": "Ejemplo-largo-12345",
+                    "name": "Turista de prueba",
+                    "role": "tourist"
+                  }
+                },
+                "guia": {
+                  "value": {
+                    "email": "guia@example.test",
+                    "password": "Ejemplo-largo-12345",
+                    "name": "Guía de prueba",
+                    "role": "guide",
+                    "bio": "Guía de montaña",
+                    "credential_reference": "REFERENCIA-DE-PRUEBA"
+                  }
+                },
+                "empresa": {
+                  "value": {
+                    "email": "empresa@example.test",
+                    "password": "Ejemplo-largo-12345",
+                    "name": "Responsable de empresa",
+                    "role": "organization",
+                    "organization_name": "Empresa de turismo",
+                    "organization_type": "company",
+                    "description": "Rutas de senderismo"
+                  }
+                },
+                "grupo": {
+                  "value": {
+                    "email": "grupo@example.test",
+                    "password": "Ejemplo-largo-12345",
+                    "name": "Responsable de grupo",
+                    "role": "organization",
+                    "organization_name": "Grupo de montaña",
+                    "organization_type": "group"
+                  }
+                }
               }
             }
           }
-        }
+        },
+        "description": "Cuenta y perfil se guardan en una sola transacción. Una cuenta de guía inicia con status pending; solo administración puede verificarla. No se permite role admin en el registro público."
       }
     },
     "/api/auth/login": {
@@ -267,7 +309,8 @@
               }
             }
           }
-        }
+        },
+        "description": "Un turista pasa a guía pendiente conservando su ID y contraseña. Un guía pendiente o rechazado puede reenviar su solicitud. Empresas/grupos y administradores no pueden solicitar este cambio."
       }
     },
     "/api/guides/me": {
@@ -1685,6 +1728,100 @@
           }
         ]
       }
+    },
+    "/api/organizations/me": {
+      "patch": {
+        "summary": "Actualizar perfil propio de empresa o grupo",
+        "operationId": "patch_api_organizations_me",
+        "tags": [
+          "Identidad"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error: 401 sesión, 403 permiso, 404 recurso, 409 conflicto, 422 validación, 429 cuota, 503 servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrganizationProfile"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/users": {
+      "post": {
+        "summary": "Crear otra cuenta administradora (solo administración)",
+        "operationId": "post_api_admin_users",
+        "tags": [
+          "Identidad"
+        ],
+        "responses": {
+          "default": {
+            "description": "Error: 401 sesión, 403 permiso, 404 recurso, 409 conflicto, 422 validación, 429 cuota, 503 servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Operación correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminRegister"
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1697,28 +1834,18 @@
     },
     "schemas": {
       "Register": {
-        "type": "object",
-        "properties": {
-          "email": {
-            "type": "string",
-            "format": "email"
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/TouristRegister"
           },
-          "password": {
-            "type": "string",
-            "minLength": 12,
-            "maxLength": 128
+          {
+            "$ref": "#/components/schemas/GuideRegister"
           },
-          "name": {
-            "type": "string",
-            "maxLength": 100
+          {
+            "$ref": "#/components/schemas/OrganizationRegister"
           }
-        },
-        "required": [
-          "email",
-          "password",
-          "name"
         ],
-        "additionalProperties": false
+        "description": "Registro público: turista por defecto, guía pendiente o empresa/grupo. Administración se crea solo mediante el endpoint administrativo."
       },
       "Login": {
         "type": "object",
@@ -2154,6 +2281,193 @@
           },
           "request_id": {
             "type": "string"
+          }
+        }
+      },
+      "TouristRegister": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 254
+          },
+          "password": {
+            "type": "string",
+            "minLength": 12,
+            "maxLength": 128
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "tourist"
+            ],
+            "default": "tourist"
+          }
+        },
+        "required": [
+          "email",
+          "password",
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "GuideRegister": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 254
+          },
+          "password": {
+            "type": "string",
+            "minLength": 12,
+            "maxLength": 128
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "guide"
+            ]
+          },
+          "bio": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "credential_reference": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        "required": [
+          "email",
+          "password",
+          "name",
+          "bio",
+          "credential_reference",
+          "role"
+        ],
+        "additionalProperties": false
+      },
+      "OrganizationRegister": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 254
+          },
+          "password": {
+            "type": "string",
+            "minLength": 12,
+            "maxLength": 128
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "organization"
+            ]
+          },
+          "organization_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 150
+          },
+          "organization_type": {
+            "type": "string",
+            "enum": [
+              "company",
+              "group"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 2000,
+            "default": ""
+          }
+        },
+        "required": [
+          "email",
+          "password",
+          "name",
+          "organization_name",
+          "organization_type",
+          "role"
+        ],
+        "additionalProperties": false
+      },
+      "AdminRegister": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 254
+          },
+          "password": {
+            "type": "string",
+            "minLength": 12,
+            "maxLength": 128
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "admin"
+            ]
+          }
+        },
+        "required": [
+          "email",
+          "password",
+          "name",
+          "role"
+        ],
+        "additionalProperties": false
+      },
+      "OrganizationProfile": {
+        "type": "object",
+        "additionalProperties": false,
+        "minProperties": 1,
+        "properties": {
+          "organization_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 150
+          },
+          "organization_type": {
+            "type": "string",
+            "enum": [
+              "company",
+              "group"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 2000,
+            "default": ""
           }
         }
       }

@@ -66,7 +66,7 @@ El objetivo 4 incluye configuración preparada y trabajo externo pendiente; no s
 
 La justificación técnica es identificar versiones de rutas y desacoplar la publicación de la confirmación blockchain. La económica consiste en demostrar el flujo sin contratar inicialmente servicios GIS ni cloud. No se presume que los microservicios sean más baratos que un monolito: aquí responden al perfil académico y añaden costo operativo. La utilidad social propuesta es facilitar información local cuya procedencia y nivel de verificación puedan consultarse.
 
-**MVP funcional:** API web con conexión, registro y JWT, tres roles, importación GPX, borrador y publicación, rutas públicas, consultas espaciales por bbox, edición con control de versión, aprobación desde la visita 201, finalización manual única, comentarios y reportes geolocalizados, fotografías, verificación administrativa de guías y anclaje de versiones en una EVM local.
+**MVP funcional:** API web con conexión, registro y JWT, cuatro tipos de cuenta, importación GPX, borrador y publicación, rutas públicas, consultas espaciales por bbox, edición con control de versión, aprobación desde la visita 201, finalización manual única, comentarios y reportes geolocalizados, fotografías, verificación administrativa de guías y anclaje de versiones en una EVM local.
 
 **Conceptual en esta fase:** mapa 2D, alternancia de mapa y satélite, herramientas para dibujar/editar y puntos de interés. No se ha construido el frontend completo ni una cartografía navegable. La vista usa relieve y datos ilustrativos explícitamente rotulados.
 
@@ -145,9 +145,14 @@ No se crean microservicios por tabla. Comentarios, reportes, fotos y actividades
 
 ## 3.3 Modelo de datos
 
+Actualizado el 10 de noviembre de 2026: cuatro perfiles y credenciales comunes. Véase `docs/tipos-de-usuario.md` para contratos y migración; el PDF original conserva la versión de la entrega inicial.
+
 | Entidad | Datos y restricciones principales |
 |---|---|
-| `identity.users` | UUID, correo único, nombre, contraseña scrypt, rol, deshabilitado y creación. El registro público siempre crea senderistas |
+| `identity.users` | UUID, correo único, nombre, contraseña scrypt, rol, deshabilitado y creación. El registro público permite turistas, guías pendientes y empresas/grupos; administración se crea por otra cuenta administradora |
+| `identity.tourist_profiles` | Perfil de cliente/turista, vinculado a su cuenta |
+| `identity.organization_profiles` | Empresa/grupo, nombre, tipo `company`/`group`, descripción y fecha de actualización |
+| `identity.admin_profiles` | Perfil de administración, vinculado a su cuenta |
 | `identity.guide_profiles` | Usuario, biografía, referencia de credencial privada, estado pendiente/verificado/rechazado y revisor |
 | `trails.routes` | UUID independiente, autor lógico, ficha, MultiLineString, métricas, estado del sendero, advertencias, borrador/publicada, versión y contadores |
 | `trails.route_visits` | Ruta, hash HMAC de cuenta/ruta y día local. Clave única de los tres campos |
@@ -177,20 +182,19 @@ Solo el autor edita una ruta. Las rutas no populares se actualizan de inmediato.
 
 ### Matriz de permisos
 
-| Acción | Visitante | Senderista | Guía verificado | Administración |
-|---|---|---|---|---|
-| Consultar rutas publicadas, fotos y reportes | Sí | Sí | Sí | Sí |
-| Importar, preparar y publicar una ruta propia | No | Sí | Sí | Sí |
-| Editar ruta propia con hasta 200 visitas | No | Directo | Directo | Directo si es autor |
-| Cambiar ruta propia con más de 200 visitas | No | Proponer | Proponer | Proponer; otra persona aprueba |
-| Editar rutas ajenas | No | No | No | No; sí moderar visibilidad |
-| Declarar finalización y consultar actividad propia | No | Sí | Sí | Sí |
-| Añadir fotos, comentarios y reportes | No | Sí | Sí | Sí |
-| Solicitar verificación profesional | No | Sí | Ya verificado | No verificarse a sí mismo |
-| Aprobar verificación de guía | No | No | No | Sí |
-| Aprobar revisión popular | No | No | No | Sí, sin autoaprobación |
-| Ocultar contenido y resolver reportes | No | No | No | Sí, posteriormente |
-| Deshabilitar otras cuentas | No | No | No | Sí |
+| Acción | Visitante | Turista | Guía | Empresa/grupo | Administración |
+|---|---|---|---|---|---|
+| Consultar rutas publicadas, fotos y reportes | Sí | Sí | Sí | Sí | Sí |
+| Importar, preparar y publicar ruta propia | No | Sí | Sí | Sí | Sí |
+| Editar ruta propia con hasta 200 visitas | No | Directo | Directo | Directo | Directo |
+| Cambiar ruta propia con más de 200 visitas | No | Proponer | Proponer | Proponer | Otra persona aprueba |
+| Editar rutas ajenas | No | No | No | No | Solo moderar visibilidad |
+| Declarar finalización y consultar actividad propia | No | Sí | Sí | Sí | Sí |
+| Añadir fotos, comentarios y reportes | No | Sí | Sí | Sí | Sí |
+| Solicitar verificación profesional | No | Pasa a guía pendiente | Si pendiente/rechazado | No | No |
+| Aprobar verificación y cambios populares | No | No | No | No | Sí, sin autoaprobación |
+| Crear otra cuenta administradora | No | No | No | No | Sí |
+| Editar perfil de empresa/grupo | No | No | No | Solo propio | No |
 
 No hay aprobación previa de rutas nuevas, fotos, comentarios o advertencias. La moderación posterior puede ocultar contenido y cambiar un reporte de no verificado a confirmado, resuelto o descartado.
 

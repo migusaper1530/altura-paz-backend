@@ -6,8 +6,9 @@ Los diagramas describen el prototipo local. Las integraciones externas GIS se in
 
 ```mermaid
 flowchart LR
-  H["Senderista"] -->|Explorar, importar GPX y declarar actividad| S["Altura Paz · sistema web GIS"]
+  H["Cliente / turista"] -->|Explorar, importar GPX y declarar actividad| S["Altura Paz · sistema web GIS"]
   G["Guía"] -->|Gestionar rutas propias y perfil| S
+  O["Empresa / grupo"] -->|Publicar rutas y gestionar su perfil| S
   A["Administrador"] -->|Verificar guías, aprobar cambios populares y moderar| S
   S -->|Registrar huellas; EVM local en demo| E["Registro Ethereum · Sepolia pendiente"]
   S -.->|Cartografía, imágenes y elevación · futura interfaz| GIS["Proveedores GIS externos"]
@@ -84,7 +85,10 @@ classDiagram
 
 ```mermaid
 erDiagram
-  USERS ||--o| GUIDE_PROFILES : solicita
+  USERS ||--o| TOURIST_PROFILES : turista
+  USERS ||--o| GUIDE_PROFILES : guia
+  USERS ||--o| ORGANIZATION_PROFILES : empresa_o_grupo
+  USERS ||--o| ADMIN_PROFILES : administrador
   USERS ||..o{ ROUTES : autor_logico
   ROUTES ||--o{ REVISIONS : cambia
   ROUTES ||--o{ ROUTE_VISITS : recibe
@@ -96,4 +100,4 @@ erDiagram
   OUTBOX ||..o| PROOFS : genera_recibo
 ```
 
-Las líneas lógicas entre contextos no son claves foráneas entre esquemas. Dentro de cada contexto sí se utilizan claves y restricciones SQL. El DDL exacto está en `db/001-schema.sql`.
+Las líneas lógicas entre contextos no son claves foráneas entre esquemas. Dentro de cada contexto sí se utilizan claves y restricciones SQL. El DDL base está en `db/001-schema.sql` y la migración de los cuatro tipos en `db/migrations/003-user-types.sql`. Cada cuenta activa pertenece a un tipo; sus credenciales se mantienen en USERS.

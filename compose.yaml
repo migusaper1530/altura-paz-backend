@@ -31,6 +31,19 @@ services:
         timeout: 3s,
         retries: 30,
       }
+  migrate:
+    image: postgis/postgis:17-3.5
+    command: ["psql", "-v", "ON_ERROR_STOP=1", "-f", "/migrations/003-user-types.sql"]
+    environment:
+      PGHOST: db
+      PGDATABASE: altura
+      PGUSER: altura_migrator
+      PGPASSWORD: ${DB_PASSWORD}
+    volumes: ["./db/migrations:/migrations:ro"]
+    networks: [backend]
+    mem_limit: 128m
+    depends_on: { db: { condition: service_healthy } }
+    restart: "no"
   rabbit:
     image: rabbitmq:4-alpine
     environment:
@@ -95,7 +108,7 @@ services:
       DATABASE_URL: postgres://altura_identity:${DB_PASSWORD}@db:5432/altura
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@example.test}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Configura ADMIN_PASSWORD}
-    depends_on: { db: { condition: service_healthy } }
+    depends_on: { migrate: { condition: service_completed_successfully } }
   gis:
     build: { context: ./gis }
     image: altura-paz-gis:local

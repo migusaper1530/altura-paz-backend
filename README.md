@@ -2,7 +2,7 @@
 
 Repositorio: [migusaper1530/altura-paz-backend](https://github.com/migusaper1530/altura-paz-backend). [Ejecuciones de CI](https://github.com/migusaper1530/altura-paz-backend/actions).
 
-MVP académico para importar GPX y publicar rutas alrededor de La Paz. Incluye API, tres roles, PostGIS, procesamiento GPX en Spring Boot, aprobación de cambios populares, finalizaciones manuales únicas y pruebas de versiones en una EVM local.
+MVP académico para importar GPX y publicar rutas alrededor de La Paz. Incluye API, cuatro tipos de cuenta, PostGIS, procesamiento GPX en Spring Boot, aprobación de cambios populares, finalizaciones manuales únicas y pruebas de versiones en una EVM local.
 
 La vista de mapa es **conceptual**. El GPX incluido es **sintético y no sirve para navegar**. La ejecución local no equivale a haber desplegado el contrato en Sepolia ni a una defensa académica terminada.
 
@@ -35,6 +35,23 @@ Para parar sin borrar la base ni fotografías:
 ```bash
 docker compose down
 ```
+
+## Tipos de usuario
+
+Cada cuenta tiene un tipo y un perfil propio:
+
+| Tipo | Valor de `role` | Tabla de perfil |
+|---|---|---|
+| Cliente o turista | `tourist` | `identity.tourist_profiles` |
+| Guía | `guide` | `identity.guide_profiles` |
+| Empresa o grupo | `organization` | `identity.organization_profiles` |
+| Administrador | `admin` | `identity.admin_profiles` |
+
+`identity.users` conserva el correo único, la contraseña y el nombre compartidos. En una empresa o grupo, `organization_type` distingue `company` y `group`. El registro público acepta turistas, guías y organizaciones. Los guías empiezan pendientes de verificación; esa condición es independiente del tipo de cuenta. Solo otro administrador puede crear administradores mediante `POST /api/admin/users`.
+
+El servicio `migrate` aplica automáticamente `db/migrations/003-user-types.sql` antes de arrancar identidad. Conserva IDs, contraseñas, rutas y revisiones de las bases anteriores; convierte `hiker` en `tourist` y las solicitudes existentes en cuentas de guía con su estado anterior. Puede repetirse. Para actualizar una instalación basta ejecutar `docker compose up -d --build`; no elimines los volúmenes ni regeneres `.env`.
+
+Ejemplos de registro para turista, guía, empresa y grupo, permisos y endpoints: [docs/tipos-de-usuario.md](docs/tipos-de-usuario.md). En `/docs`, el registro incluye un selector de ejemplos para turista, guía, empresa y grupo.
 
 ## Utilizar la API sin programar
 

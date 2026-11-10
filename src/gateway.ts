@@ -45,7 +45,7 @@ export class GatewayController {
   @All("api/*path") async proxy(@Req() req: Request, @Res() res: Response) {
     const path = req.path;
     const identity =
-      /^\/api\/(auth|users|guides)(\/|$)/.test(path) ||
+      /^\/api\/(auth|users|guides|organizations)(\/|$)/.test(path) ||
       /^\/api\/admin\/(guides|users)(\/|$)/.test(path);
     const ledger = path.startsWith("/api/proofs/");
     const service = identity ? "identity" : ledger ? "ledger" : "trails";

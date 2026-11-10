@@ -16,6 +16,7 @@ USER node
 EXPOSE 3000
 CMD ["node","dist/main.js"]
 FROM build AS tools
+COPY db ./db
 COPY docs ./docs
 COPY public ./public
 COPY contracts ./contracts

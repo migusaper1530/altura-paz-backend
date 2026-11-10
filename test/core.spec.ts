@@ -27,8 +27,11 @@ test("contraseña salada y comparación constante", () => {
   expect(passwordMatches("otro", a.split(":")[0] + ":aa")).toBe(false);
 });
 test("JWT limita rol, algoritmo, audiencia y vencimiento", () => {
-  const u = { sub: randomUUID(), role: "hiker" as const };
+  const u = { sub: randomUUID(), role: "tourist" as const };
   expect(auth("Bearer " + sign(u))).toMatchObject(u);
+  for (const role of ["tourist", "guide", "organization", "admin"] as const)
+    expect(auth("Bearer " + sign({ sub: u.sub, role })).role).toBe(role);
+  expect(auth("Bearer " + sign({ sub: u.sub, role: "hiker" as any })).role).toBe("tourist");
   expect(() => auth()).toThrow();
   expect(() => auth("Basic abc")).toThrow();
   expect(() => auth("Bearer inválido")).toThrow();
@@ -51,7 +54,7 @@ test("canonicalización estable, SHA-256 y separación de versiones", () => {
   expect(proofId(route, 1)).not.toBe(proofId(route, 2));
 });
 test("permisos por autor y estado publicado", () => {
-  const u = { sub: randomUUID(), role: "hiker" as const };
+  const u = { sub: randomUUID(), role: "tourist" as const };
   expect(() => assertOwner(u, u.sub)).not.toThrow();
   expect(() => assertOwner(u, randomUUID())).toThrow();
   expect(() =>
