@@ -2,7 +2,7 @@ export const difficultyNames = { easy: 'Fácil', moderate: 'Moderada', hard: 'Ex
 export const roleNames = { tourist: 'Cliente / turista', guide: 'Guía', organization: 'Empresa / grupo', admin: 'Administrador' };
 export const statusNames = { unknown: 'Estado sin confirmar', open: 'Abierto', caution: 'Precaución', closed: 'Cerrado' };
 export const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
-export const distance = meters => Number.isFinite(Number(meters)) && meters != null ? (Number(meters) / 1000).toLocaleString('es-BO', { maximumFractionDigits: 1 }) + ' km' : 'Sin datos';
+export const distance = meters => Number.isFinite(Number(meters)) && meters != null ? (Number(meters) < 1000 ? Math.round(Number(meters)).toLocaleString('es-BO') + ' m' : (Number(meters) / 1000).toLocaleString('es-BO', { maximumFractionDigits: 1 }) + ' km') : 'Sin datos';
 export function duration(minutes) {
   if (minutes == null || !Number.isFinite(Number(minutes))) return 'Sin datos';
   const value = Math.round(Number(minutes));

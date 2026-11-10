@@ -1,10 +1,10 @@
 import { escapeHtml as esc, distance, duration, elevation, today, lineSegments, selectRoutes, sampleRoutes, difficultyNames, roleNames, statusNames } from './ui.mjs';
 const $ = selector => document.querySelector(selector);
-const state = { demo: new URLSearchParams(location.search).get('demo') === '1', routes: [], selected: null, token: null, user: null, view: 'explore', difficulty: '', query: '', sort: 'recent', offset: 0, more: false, layers: new Map(), generation: 0, completed: new Set() };
+const state = { source: 'gis', area: 'mallasa', gisMeta: null, demo: new URLSearchParams(location.search).get('demo') === '1', routes: [], selected: null, token: null, user: null, view: 'explore', difficulty: '', query: '', sort: 'long', offset: 0, more: false, layers: new Map(), generation: 0, completed: new Set() };
 let map, routeLayer, locationMarker, toastTimer, sessionTimer;
 const mountain = '<svg viewBox="0 0 60 50" aria-hidden="true"><path d="M4 43 24 7l28 36H4Zm15-27 6 9 7-8M30 43l9-16"/></svg>';
-const badge = route => `<span class="badge ${esc(route.difficulty)}">${esc(difficultyNames[route.difficulty] || 'Sin dificultad')}</span>`;
-const metric = route => `<span><strong>${distance(route.distance_m)}</strong></span><span class="metric-separator"></span><span>${duration(route.estimated_minutes)}</span><span class="metric-separator"></span><span>↗ ${elevation(route.ascent_m)}</span>`;
+const badge = route => route.source === 'gis' ? `<span class="badge gis">${route.source_kind === 'hiking_route' ? 'Ruta OSM' : 'Tramo de sendero'}</span>` : `<span class="badge ${esc(route.difficulty)}">${esc(difficultyNames[route.difficulty] || 'Sin dificultad')}</span>`;
+const metric = route => route.source === 'gis' ? `<span><strong>${distance(route.distance_m)}</strong></span><span class="metric-separator"></span><span>OpenStreetMap</span>` : `<span><strong>${distance(route.distance_m)}</strong></span><span class="metric-separator"></span><span>${duration(route.estimated_minutes)}</span><span class="metric-separator"></span><span>↗ ${elevation(route.ascent_m)}</span>`;
 function toast(message, error = false) { clearTimeout(toastTimer); const t = $('#toast'); t.textContent = message; t.classList.toggle('error', error); t.hidden = false; toastTimer = setTimeout(() => { t.hidden = true; }, 5500); }
 function clearSession() { state.token = null; state.user = null; state.completed.clear(); clearTimeout(sessionTimer); $('#account-button').textContent = 'Ingresar ↗'; $('#admin-nav').hidden = true; }
 async function api(path, options = {}) {
@@ -16,7 +16,7 @@ async function api(path, options = {}) {
     let message = payload.error?.message || payload.error || 'No se pudo completar la solicitud.';
     if (Array.isArray(message)) message = message.map(item => `${item.path ? item.path + ': ' : ''}${item.message || item}`).join('\n');
     if (typeof message === 'object') message = message.message || 'Revisa los datos e inténtalo otra vez.';
-    if (response.status === 503) message = 'Los servicios están apagados o no responden. Inicia el backend e inténtalo de nuevo.';
+    if (response.status === 503 && !payload.error) message = 'Los servicios están apagados o no responden. Inicia el backend e inténtalo de nuevo.';
     if (response.status === 429) message = 'Has hecho varias solicitudes. Espera un minuto e inténtalo otra vez.';
     throw new Error(message);
   }
@@ -52,9 +52,11 @@ function drawRoutes(items, fit = true) {
     const segments = lineSegments(route.geometry); if (!segments.length) return;
     const white = L.polyline(segments, { color: 'white', weight: 8, opacity: .9 }).addTo(routeLayer);
     const line = L.polyline(segments, { color: '#2c6750', weight: 4, opacity: .85 }).addTo(routeLayer);
-    const marker = L.marker(segments[0][0], { icon: L.divIcon({ className: 'route-pin', html: String(index + 1), iconSize: [32, 32], iconAnchor: [16, 16] }), title: route.name, keyboard: true }).addTo(routeLayer);
+    const marker = route.source === 'gis'
+      ? L.circleMarker(segments[0][Math.floor(segments[0].length / 2)], { radius: 3.5, color: 'white', weight: 1.5, fillColor: '#173e32', fillOpacity: 1 }).addTo(routeLayer).bindTooltip(esc(route.name))
+      : L.marker(segments[0][0], { icon: L.divIcon({ className: 'route-pin', html: String(index + 1), iconSize: [32, 32], iconAnchor: [16, 16] }), title: route.name, keyboard: true }).addTo(routeLayer);
     marker.on('click', () => selectRoute(route.id)); line.on('click', () => selectRoute(route.id));
-    const end = segments.at(-1).at(-1); L.marker(end, { icon: L.divIcon({ className: 'route-end', iconSize: [12, 12], iconAnchor: [6, 6] }), interactive: false }).addTo(routeLayer);
+    const end = segments.at(-1).at(-1); if (route.source !== 'gis') L.marker(end, { icon: L.divIcon({ className: 'route-end', iconSize: [12, 12], iconAnchor: [6, 6] }), interactive: false }).addTo(routeLayer);
     state.layers.set(route.id, { line, marker, white });
   });
   if (fit) fitMap();
@@ -62,25 +64,42 @@ function drawRoutes(items, fit = true) {
 function fitMap() { if (map && routeLayer.getBounds().isValid()) map.fitBounds(routeLayer.getBounds(), { padding: [65, 70], maxZoom: 14, animate: false }); }
 function renderRoutes() {
   const items = selectRoutes(state.routes, { query: state.query, difficulty: state.difficulty, sort: state.sort });
-  $('#result-count').textContent = `${items.length}${state.more ? '+' : ''} ${items.length === 1 ? 'ruta' : 'rutas'} ${state.demo ? 'de ejemplo' : 'publicadas'}`;
+  $('#result-count').textContent = `${items.length}${state.more ? '+' : ''} ${state.source === 'gis' && !state.demo ? (items.length === 1 ? 'trazado' : 'trazados') : (items.length === 1 ? 'ruta' : 'rutas')} ${state.demo ? 'de ejemplo' : state.source === 'gis' ? 'de OpenStreetMap' : 'publicadas'}`;
   $('#route-list').innerHTML = items.length ? items.map(route => `<button class="route-card ${route.id === state.selected ? 'selected' : ''}" data-route="${esc(route.id)}" aria-label="Ver ${esc(route.name)}" aria-pressed="${route.id === state.selected}">${route.photo ? `<img class="route-thumbnail" src="${esc(route.photo)}" alt="" loading="lazy">` : `<div class="route-placeholder">${mountain}</div>`}<div class="route-summary">${badge(route)}<h3>${esc(route.name)}</h3><p class="route-location">${esc(route.place || 'La Paz y alrededores')}</p><div class="metrics">${metric(route)}</div></div><span class="card-open" aria-hidden="true">›</span></button>`).join('') : '<div class="empty"><div class="mountain-empty">⌁</div><h3>Aquí empieza otro camino.</h3><p>No hay rutas con estos filtros. Prueba otra búsqueda o comparte tu primer GPX.</p><button class="button secondary" data-action="reset">Quitar filtros</button><button class="text-button" data-action="import">Importar una ruta</button></div>';
   if (!items.some(r => r.id === state.selected)) { state.selected = null; $('#map-card').hidden = true; }
-  $('#load-more').hidden = state.demo || !state.more;
+  $('#load-more').hidden = state.demo || state.source === 'gis' || !state.more;
   drawRoutes(items);
 }
 async function loadRoutes(append = false) {
   const generation = ++state.generation;
   $('#status-banner').hidden = true;
+  $('#difficulty-filters').hidden = state.source === 'gis' && !state.demo; $('#gis-area-label').hidden = state.source !== 'gis' || state.demo;
+  $('#sort option[value=recent]').textContent = state.source === 'gis' && !state.demo ? 'Orden de la fuente' : 'Más recientes';
+  $('#list-title').textContent = state.source === 'gis' && !state.demo ? 'Trazados de la web GIS' : 'Rutas para descubrir';
+  $('#map-legend').innerHTML = state.source === 'gis' && !state.demo ? '<i></i> Senderos de OpenStreetMap' : '<i></i> Rutas compartidas <span class="legend-end"></span> Llegada';
   if (state.demo) { state.routes = sampleRoutes; renderRoutes(); return; }
-  if (!append) { state.offset = 0; $('#route-list').innerHTML = '<div class="empty"><p>Buscando caminos…</p></div>'; }
+  if (!append) { state.offset = 0; $('#route-list').innerHTML = '<div class="empty"><p>' + (state.source === 'gis' ? 'Consultando senderos reales en OpenStreetMap…' : 'Buscando caminos…') + '</p></div>'; }
   try {
+    if (state.source === 'gis') {
+      const result = await api('/gis/routes?area=' + encodeURIComponent(state.area));
+      if (generation !== state.generation || state.view !== 'explore') return;
+      state.gisMeta = result; state.more = false;
+      state.routes = result.features.map(feature => ({ id: feature.id, geometry: feature.geometry, ...feature.properties, source: 'gis', source_kind: feature.properties.kind, place: result.area_name, state: 'external' }));
+      renderRoutes();
+      $('.map-location strong').textContent = result.area_name;
+      if (!state.routes.length && map) { const [west, south, east, north] = result.bbox; map.fitBounds([[south, west], [north, east]], { animate: false }); }
+      const banner = $('#status-banner'); banner.hidden = false; banner.classList.add('gis-notice');
+      banner.textContent = `${result.attribution}. Zona acotada: ${result.area_name}. Licencia ODbL. Consulta: ${new Date(result.fetched_at).toLocaleString('es-BO', { timeZone: 'America/La_Paz' })}. ${result.warning || 'Datos cartográficos, sin verificación de campo.'}`;
+      return;
+    }
+    $('.map-location strong').textContent = 'La Paz y alrededores';
     const query = new URLSearchParams({ limit: '20', offset: String(state.offset) });
     if (state.query) query.set('q', state.query); if (state.difficulty) query.set('difficulty', state.difficulty);
     const result = await api('/routes?' + query); if (generation !== state.generation || state.view !== 'explore') return;
     state.routes = append ? [...state.routes, ...result.items] : result.items; state.more = result.items.length === 20; renderRoutes();
   } catch (error) {
     if (generation !== state.generation || state.view !== 'explore') return;
-    state.routes = []; state.more = false; $('#result-count').textContent = 'Sin conexión con las rutas';
+    state.routes = []; state.more = false; state.selected = null; $('#map-card').hidden = true; drawRoutes([]); $('#result-count').textContent = 'Sin conexión con las rutas';
     $('#route-list').innerHTML = `<div class="empty"><div class="mountain-empty">⌁</div><h3>El camino sigue aquí.</h3><p>${esc(error.message)}</p><button class="button primary" data-action="retry">Volver a intentar</button><p><a class="text-button" href="/?demo=1">Explorar el diseño con rutas de ejemplo</a></p></div>`;
   }
 }
@@ -89,12 +108,13 @@ async function selectRoute(id) {
   state.selected = id;
   document.querySelectorAll('[data-route]').forEach(el => { el.classList.toggle('selected', el.dataset.route === id); el.setAttribute('aria-pressed', String(el.dataset.route === id)); });
   for (const [key, layer] of state.layers) { layer.line.setStyle({ color: key === id ? '#173e32' : '#648c64', weight: key === id ? 5 : 3, opacity: key === id ? 1 : .7 }); layer.marker.getElement()?.classList.toggle('active', key === id); }
-  const layer = state.layers.get(id); if (layer && map) { layer.line.bringToFront(); layer.marker.setZIndexOffset(1000); map.fitBounds(layer.line.getBounds(), { paddingTopLeft: [45, 90], paddingBottomRight: [60, 310], maxZoom: 14, animate: false }); }
-  $('#map-card').innerHTML = `${route.photo ? `<img class="map-card-photo" src="${esc(route.photo)}" alt="Paisaje de referencia; créditos en la ficha">` : ''}<button class="map-card-close" data-action="unselect" aria-label="Cerrar ficha">✕</button><div class="map-card-body">${badge(route)}<h2>${esc(route.name)}</h2><p>${esc(route.place || 'Ruta compartida en La Paz')}</p><div class="metrics"><span><strong>${distance(route.distance_m)}</strong>Distancia</span><span><strong>${duration(route.estimated_minutes)}</strong>Tiempo estimado</span><span><strong>${elevation(route.ascent_m)}</strong>Ascenso</span></div><button class="button primary full" data-detail="${esc(id)}">Explorar esta ruta <span aria-hidden="true">↗</span></button></div>`;
+  const layer = state.layers.get(id); if (layer && map) { layer.line.bringToFront(); layer.marker.setZIndexOffset?.(1000); map.fitBounds(layer.line.getBounds(), { paddingTopLeft: [45, 90], paddingBottomRight: [60, 310], maxZoom: route.source === 'gis' ? 17 : 14, animate: false }); }
+  $('#map-card').innerHTML = `${route.photo ? `<img class="map-card-photo" src="${esc(route.photo)}" alt="Paisaje de referencia; créditos en la ficha">` : ''}<button class="map-card-close" data-action="unselect" aria-label="Cerrar ficha">✕</button><div class="map-card-body">${badge(route)}<h2>${esc(route.name)}</h2><p>${esc(route.place || 'Ruta compartida en La Paz')}</p><div class="metrics"><span><strong>${distance(route.distance_m)}</strong>${route.source === 'gis' ? 'Longitud cartográfica' : 'Distancia'}</span>${route.source === 'gis' ? '<span>Fuente web<br><strong>OpenStreetMap</strong></span>' : `<span><strong>${duration(route.estimated_minutes)}</strong>Tiempo estimado</span><span><strong>${elevation(route.ascent_m)}</strong>Ascenso</span>`}</div><button class="button primary full" data-detail="${esc(id)}">Explorar esta ruta <span aria-hidden="true">↗</span></button></div>`;
   $('#map-card').hidden = false;
-  if (matchMedia('(max-width:760px)').matches) showDetail(route);
+  if (matchMedia('(max-width:760px)').matches && !document.body.classList.contains('mobile-map')) showDetail(route);
 }
 async function showDetail(route) {
+  if (route.source === 'gis') { showGisDetail(route); return; }
   modal(route.name, '<p class="muted">Abriendo el recorrido…</p>', state.demo ? 'Ruta de ejemplo' : 'El recorrido');
   try {
     if (!state.demo) route = await api('/routes/' + encodeURIComponent(route.id));
@@ -109,6 +129,10 @@ async function showDetail(route) {
       $('#route-comments').innerHTML = comments.length ? comments.map(c => `<div class="comment"><p>${esc(c.body)}</p><time>${esc(new Date(c.created_at).toLocaleDateString('es-BO'))}</time></div>`).join('') : '<p class="form-help">Sé la primera persona en compartir su experiencia.</p>';
     } else if (!state.demo) { $('#route-photos').textContent = 'Publica el borrador para añadir fotografías.'; $('#route-comments').textContent = 'Los comentarios estarán disponibles al publicar.'; }
   } catch (error) { $('#modal-body').innerHTML = `<div class="form-error">${esc(error.message)}</div>`; }
+}
+function showGisDetail(route) {
+  const tags = route.source_tags || {};
+  modal(route.name, `${badge(route)}<div class="detail-metrics"><div><strong>${distance(route.distance_m)}</strong><small>Longitud de la geometría</small></div><div><strong>OSM</strong><small>Fuente GIS</small></div><div><strong>${route.geometry.coordinates.length}</strong><small>Segmentos conservados</small></div></div><p class="detail-description">${esc(route.description)}</p><div class="callout">${route.source_kind === 'trail_segment' ? 'Es un tramo de sendero cartografiado, no necesariamente una excursión completa.' : 'Ruta registrada en la cartografía colaborativa.'} El trazado puede contener segmentos separados y no fija un inicio ni un sentido de marcha. Comprueba accesos y condiciones antes de salir.</div><div class="gis-detail-meta"><div><span>Dificultad publicada</span><strong>${esc(tags.sac_scale || 'Sin datos')}</strong></div><div><span>Superficie</span><strong>${esc(tags.surface || 'Sin datos')}</strong></div><div><span>Acceso publicado</span><strong>${esc(tags.access || tags.foot || 'Sin datos')}</strong></div><div><span>Desnivel / duración</span><strong>Sin datos</strong></div></div><div class="divider"></div><p class="form-help">© OpenStreetMap contributors. Datos bajo licencia <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">ODbL</a>. Las cifras de longitud se calculan sobre las coordenadas descargadas. Este trazado externo se muestra para consulta y no tiene comentarios ni actividades de la comunidad.</p><div class="form-actions"><a class="button secondary" href="${esc(route.source_url)}" target="_blank" rel="noopener">Ver elemento original en OpenStreetMap</a></div>`, state.gisMeta?.area_name || 'Datos de la web GIS');
 }
 function requireUser() { if (state.demo) { toast('Esta es una vista de diseño. Abre las rutas reales para guardar cambios.', true); return false; } if (!state.user) { showAuth(); return false; } return true; }
 function showAuth(register = false) {
@@ -149,7 +173,7 @@ function showImport() {
 }
 async function publishRoute(id) {
   if (!requireUser()) return;
-  try { await api(`/routes/${encodeURIComponent(id)}/publish`, { method: 'POST' }); $('#modal').close(); toast('Ruta publicada. Ya forma parte del camino compartido.'); if (state.view === 'mine') showView('mine'); else loadRoutes(); } catch (error) { toast(error.message, true); }
+  try { await api(`/routes/${encodeURIComponent(id)}/publish`, { method: 'POST' }); $('#modal').close(); toast('Ruta publicada. Ya forma parte del camino compartido.'); if (state.view === 'mine') showView('mine'); else { state.source = 'community'; document.querySelectorAll('[data-source]').forEach(b => b.classList.toggle('active', b.dataset.source === 'community')); loadRoutes(); } } catch (error) { toast(error.message, true); }
 }
 async function editRoute(id) {
   if (!requireUser()) return;
@@ -242,7 +266,7 @@ document.addEventListener('click', async event => {
     else if (action === 'reset') { state.difficulty = ''; state.query = ''; $('#search').value = ''; document.querySelectorAll('[data-difficulty]').forEach(b => b.classList.toggle('active', b.dataset.difficulty === '')); loadRoutes(); }
     else if (action === 'unselect') { $('#map-card').hidden = true; state.selected = null; }
     else if (action === 'credits') credits();
-    else if (action === 'about-map') modal('Un mapa para encontrar tu camino.', '<p class="zoom-info">Explora la cartografía de OpenStreetMap y selecciona un trazado para ver su ficha. El círculo numerado indica el inicio y el cuadrado amarillo, la llegada. Usa el zoom o el botón de encuadre para orientarte.</p><div class="callout">Los mapas y las rutas compartidas pueden contener errores. Comprueba las condiciones del recorrido antes de salir. La versión actual necesita conexión.</div><p class="form-help"><a href="https://www.openstreetmap.org/fixthemap" target="_blank" rel="noopener">Informar de un problema en el mapa</a></p>');
+    else if (action === 'about-map') modal('Un mapa para encontrar tu camino.', '<p class="zoom-info">Explora la cartografía de OpenStreetMap y selecciona un trazado para ver su ficha. En la capa GIS los puntos pequeños ubican los tramos sin tapar sus líneas. En Comunidad, el círculo numerado indica el inicio del GPX y el cuadrado amarillo, la llegada. Usa el zoom o el botón de encuadre para orientarte.</p><div class="callout">Los mapas y las rutas compartidas pueden contener errores. Comprueba las condiciones del recorrido antes de salir. La versión actual necesita conexión.</div><p class="form-help"><a href="https://www.openstreetmap.org/fixthemap" target="_blank" rel="noopener">Informar de un problema en el mapa</a></p>');
     else if (action === 'guide-application') guideApplication();
     else if (action === 'create-admin') createAdmin();
     else if (action === 'mine') showView('mine');
@@ -250,6 +274,7 @@ document.addEventListener('click', async event => {
     else if (action === 'logout') { clearSession(); $('#modal').close(); showView('explore'); toast('Sesión cerrada.'); }
   }
   if ('difficulty' in target.dataset) { state.difficulty = target.dataset.difficulty; document.querySelectorAll('[data-difficulty]').forEach(b => b.classList.toggle('active', b === target)); loadRoutes(); }
+  if (target.dataset.source) { if (state.demo && target.dataset.source === 'gis') { location.assign('/'); return; } state.source = target.dataset.source; state.difficulty = ''; state.selected = null; $('#map-card').hidden = true; document.querySelectorAll('[data-source]').forEach(b => b.classList.toggle('active', b === target)); document.querySelectorAll('[data-difficulty]').forEach(b => b.classList.toggle('active', b.dataset.difficulty === '')); loadRoutes(); }
   if (target.dataset.route) selectRoute(target.dataset.route);
   if (target.dataset.detail) { const route = state.routes.find(r => r.id === target.dataset.detail); if (route) showDetail(route); }
   if (target.dataset.publish) { target.disabled = true; await publishRoute(target.dataset.publish); if (target.isConnected) target.disabled = false; }
@@ -257,7 +282,7 @@ document.addEventListener('click', async event => {
   if (target.dataset.complete) completeRoute(target.dataset.complete);
   if (target.dataset.photo) uploadPhoto(target.dataset.photo);
   if (target.dataset.view) showView(target.dataset.view);
-  if (target.dataset.mobile) { document.body.classList.toggle('mobile-map', target.dataset.mobile === 'map'); document.querySelectorAll('[data-mobile]').forEach(b => b.classList.toggle('active', b === target)); map?.invalidateSize(); }
+  if (target.dataset.mobile) { document.body.classList.toggle('mobile-map', target.dataset.mobile === 'map'); document.querySelectorAll('[data-mobile]').forEach(b => b.classList.toggle('active', b === target)); map?.invalidateSize(); if (target.dataset.mobile === 'map') { if (state.selected) selectRoute(state.selected); else fitMap(); } }
   if (target.dataset.undo) {
     if (!confirm('¿Retirar tu declaración de finalización de esta ruta?')) return;
     try { await api(`/routes/${encodeURIComponent(target.dataset.undo)}/completion`, { method: 'DELETE' }); toast('Declaración retirada.'); showView('activity'); } catch (error) { toast(error.message, true); }
@@ -272,6 +297,7 @@ document.addEventListener('click', async event => {
 $('#modal').addEventListener('click', event => { if (event.target !== $('#modal')) return; const r = $('#modal').getBoundingClientRect(); if (event.clientX < r.left || event.clientX > r.right || event.clientY < r.top || event.clientY > r.bottom) $('#modal').close(); });
 $('#search-form').addEventListener('submit', event => { event.preventDefault(); state.query = $('#search').value.trim(); loadRoutes(); });
 $('#search').addEventListener('search', () => { if (!$('#search').value) { state.query = ''; loadRoutes(); } });
+$('#gis-area').addEventListener('change', event => { state.area = event.target.value; state.selected = null; $('#map-card').hidden = true; loadRoutes(); });
 $('#sort').addEventListener('change', event => { state.sort = event.target.value; renderRoutes(); });
 $('#load-more').addEventListener('click', () => { state.offset += 20; loadRoutes(true); });
 $('#fit-map').addEventListener('click', fitMap);
@@ -281,7 +307,8 @@ $('#locate').addEventListener('click', () => {
     if (!map) return; const latLng = [position.coords.latitude, position.coords.longitude]; locationMarker?.remove(); locationMarker = L.circleMarker(latLng, { radius: 8, color: '#ffffff', weight: 3, fillColor: '#306c9f', fillOpacity: 1 }).addTo(map); map.setView(latLng, 13); toast('Tu ubicación se muestra solo en este mapa.');
   }, () => toast('No se pudo consultar tu ubicación. Puedes explorar el mapa manualmente.', true), { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 });
 });
-if (state.demo) { document.body.classList.add('demo-mode'); $('#design-banner').hidden = false; }
+if (state.demo) { state.source = 'community'; document.querySelectorAll('[data-source]').forEach(b => b.classList.toggle('active', b.dataset.source === 'community')); document.body.classList.add('demo-mode'); $('#design-banner').hidden = false; }
+$('#sort').value = state.sort;
 initMap();
 await loadRoutes();
 if (state.demo && state.routes.length && !matchMedia('(max-width:760px)').matches) { await selectRoute(state.routes[0].id); fitMap(); }

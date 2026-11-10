@@ -877,6 +877,13 @@
           }
         }
       }
+    },
+    {
+      "name": "Consultar senderos GIS web (OpenStreetMap)",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/gis/routes?area=mallasa"
+      }
     }
   ]
 }

@@ -5,3 +5,4 @@ dist
 gis/target
 evidence
 deployments
+gis-cache

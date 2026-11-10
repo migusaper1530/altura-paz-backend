@@ -158,6 +158,8 @@ services:
       LEDGER_URL: http://ledger:3000
       AUTH_RATE_LIMIT: ${AUTH_RATE_LIMIT:-20}
       API_RATE_LIMIT: ${API_RATE_LIMIT:-600}
+      GIS_CACHE_DIR: /app/media/gis-cache
+    volumes: ["gis-cache:/app/media/gis-cache"]
     ports: ["127.0.0.1:8088:3000"]
     depends_on: [identity, trails, ledger]
   qa:
@@ -206,5 +208,6 @@ volumes:
   deployments: {}
   caddy-data: {}
   caddy-config: {}
+  gis-cache: {}
 networks:
   backend: {}

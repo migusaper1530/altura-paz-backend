@@ -1822,6 +1822,97 @@
           }
         }
       }
+    },
+    "/api/gis/routes": {
+      "get": {
+        "summary": "Consultar senderos reales de OpenStreetMap por zona",
+        "operationId": "get_api_gis_routes",
+        "tags": [
+          "GIS web"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "type",
+                    "features",
+                    "source",
+                    "fetched_at",
+                    "area"
+                  ],
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "FeatureCollection"
+                      ]
+                    },
+                    "features": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "source": {
+                      "type": "string"
+                    },
+                    "fetched_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "area": {
+                      "type": "string"
+                    },
+                    "cache_status": {
+                      "type": "string",
+                      "enum": [
+                        "updated",
+                        "fresh",
+                        "stale"
+                      ]
+                    },
+                    "license": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error: 401 sesión, 403 permiso, 404 recurso, 409 conflicto, 422 validación, 429 cuota, 503 servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "parameters": [
+          {
+            "name": "area",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "mallasa",
+                "palca",
+                "sur",
+                "cordillera"
+              ],
+              "default": "mallasa"
+            }
+          }
+        ],
+        "description": "GeoJSON FeatureCollection con atribución ODbL, identificadores OSM, fecha, ámbito y estado de caché. Datos externos de consulta; no equivale a una ruta turística verificada."
+      }
     }
   },
   "components": {

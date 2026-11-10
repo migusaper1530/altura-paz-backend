@@ -21,6 +21,7 @@ import { GatewayController, rateLimit } from "./gateway";
 import { LedgerController, LedgerService, OutboxPublisher } from "./ledger";
 import { ResilientHttp } from "./transport";
 import { PublicListCache } from "./cache";
+import { WebGisController, WebGisService } from "./web-gis";
 
 @Controller()
 class HealthController {
@@ -34,8 +35,8 @@ class HealthController {
 }
 const definitions: any = {
   gateway: {
-    controllers: [GatewayController],
-    providers: [ResilientHttp, PublicListCache],
+    controllers: [WebGisController, GatewayController],
+    providers: [WebGisService, ResilientHttp, PublicListCache],
   },
   identity: {
     controllers: [IdentityController],

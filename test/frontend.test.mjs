@@ -9,7 +9,7 @@ test('contenido de usuarios se puede insertar como texto sin abrir etiquetas o a
 });
 test('las métricas distinguen datos ausentes de ascenso cero y horas completas',()=>{
  assert.equal(elevation(null),'Sin datos');assert.equal(elevation(0),'0 m');
- assert.equal(distance(undefined),'Sin datos');assert.match(distance(3200),/3[,.]2 km/);
+ assert.equal(distance(undefined),'Sin datos');assert.equal(distance(5.7),'6 m');assert.match(distance(3200),/3[,.]2 km/);
  assert.equal(duration(60),'1 h');assert.equal(duration(95),'1 h 35 min');assert.equal(duration(0),'0 min');
 });
 test('las búsquedas admiten tildes y los filtros y orden no modifican el catálogo',()=>{
@@ -24,4 +24,22 @@ test('los segmentos GPX se mantienen separados y las coordenadas inválidas no s
  assert.equal(result.length,2);assert.deepEqual(result[0],[[-16,-68],[-16.1,-68.1]]);
  assert.deepEqual(lineSegments({type:'Point',coordinates:[0,0]}),[]);
  assert.deepEqual(lineSegments({type:'LineString',coordinates:[[0,0],[1,1]]}),[[[0,0],[1,1]]]);
+});
+
+test('el servidor frontend reenvía peticiones, credenciales y cuerpos al backend local', async () => {
+ const {createServer}=await import('node:http');
+ const {createFrontendServer}=await import('../scripts/frontend-preview.mjs');
+ const listen=server=>new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+ const stop=server=>new Promise(resolve=>server.close(resolve));
+ const backend=createServer(async(req,res)=>{const chunks=[];for await(const chunk of req)chunks.push(chunk);res.writeHead(201,{'Content-Type':'application/json'});res.end(JSON.stringify({path:req.url,method:req.method,body:Buffer.concat(chunks).toString(),authorization:req.headers.authorization}));});
+ await listen(backend);
+ const frontend=createFrontendServer({backend:'http://127.0.0.1:'+backend.address().port});await listen(frontend);
+ try{
+  const base='http://127.0.0.1:'+frontend.address().port;
+  const r=await fetch(base+'/api/auth/register?test=1',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer test-only-token'},body:JSON.stringify({name:'Prueba'})});
+  assert.equal(r.status,201);assert.deepEqual(await r.json(),{path:'/api/auth/register?test=1',method:'POST',body:'{"name":"Prueba"}',authorization:'Bearer test-only-token'});
+  assert.equal((await fetch(base+'/')).status,200);
+  assert.equal((await fetch(base+'/assets/../../.env')).status,404);
+  assert.throws(()=>createFrontendServer({backend:'https://example.org'}));
+ }finally{await stop(frontend);await stop(backend);}
 });

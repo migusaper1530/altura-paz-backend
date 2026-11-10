@@ -8,7 +8,7 @@ RUN npm run build
 FROM node:24-alpine AS runtime
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci --omit=dev --no-audit --no-fund && mkdir -p media deployments && chown -R node:node media deployments
+RUN npm ci --omit=dev --no-audit --no-fund && mkdir -p media/gis-cache deployments && chown -R node:node media deployments
 COPY --from=build /app/dist ./dist
 COPY public ./public
 COPY docs ./docs

@@ -2,7 +2,7 @@
 
 Repositorio: [migusaper1530/altura-paz-backend](https://github.com/migusaper1530/altura-paz-backend). [Ejecuciones de CI](https://github.com/migusaper1530/altura-paz-backend/actions).
 
-MVP académico para importar GPX y publicar rutas alrededor de La Paz. Incluye API, cuatro tipos de cuenta, PostGIS, procesamiento GPX en Spring Boot, aprobación de cambios populares, finalizaciones manuales únicas y pruebas de versiones en una EVM local.
+MVP académico para consultar senderos reales de OpenStreetMap e importar GPX/publicar rutas alrededor de La Paz. Incluye API, cuatro tipos de cuenta, PostGIS, procesamiento GPX en Spring Boot, aprobación de cambios populares, finalizaciones manuales únicas y pruebas de versiones en una EVM local.
 
 El frontend permite explorar el mapa, gestionar la cuenta, importar/publicar GPX y registrar actividades. La vista de diseño utiliza datos de ejemplo identificados. El GPX incluido es **sintético y no sirve para navegar**. La ejecución local no equivale a haber desplegado el contrato en Sepolia ni a una defensa académica terminada.
 
@@ -47,11 +47,21 @@ Para revisar **solo el diseño** sin arrancar Docker:
 npm run frontend:preview
 ```
 
-Abre <http://localhost:8090/?demo=1>. El modo de ejemplo solo permite explorar y revisar formularios: no crea usuarios ni guarda actividades. Para utilizar la API real, arranca el proyecto y abre <http://localhost:8088> sin `demo=1`. La vista previa estática termina con Ctrl+C.
+Abre <http://localhost:8090/> para usar la API del backend local en 8088. El servidor frontend reenvía `/api/*` al gateway. Si el backend está apagado muestra un error y permite reintentar. Para revisar solo el diseño utiliza <http://localhost:8090/?demo=1>. El modo de ejemplo solo permite explorar y revisar formularios: no crea usuarios ni guarda actividades. Para utilizar la API real, arranca el proyecto y abre <http://localhost:8088> sin `demo=1`. La vista previa estática termina con Ctrl+C.
 
 Los JWT se conservan solo en memoria de la pestaña y caducan a los quince minutos. Recargar o cerrar la pestaña requiere ingresar de nuevo. La ubicación se solicita solo al pulsar su control, se muestra localmente y no se envía a la API. No hay descargas de teselas para uso sin conexión. Las fotografías de paisaje y las fuentes se incluyen localmente con sus créditos y licencias en `public/assets/`; la cartografía requiere conexión.
 
 Código de interfaz: `public/index.html`, `public/app.css`, `public/app.mjs` y `public/ui.mjs`. No requiere una compilación frontend ni nuevas dependencias del backend. Decisiones visuales: `docs/frontend-diseno.md`.
+
+## Senderos obtenidos de la web GIS
+
+Al abrir el sitio se consultan automáticamente los senderos GIS mediante `GET /api/gis/routes?area=mallasa`. El backend obtiene geometrías de OpenStreetMap por Overpass, con respaldo de la API oficial de mapa para áreas pequeñas. Convierte las vías y relaciones en GeoJSON y el frontend dibuja las líneas reales. No se utiliza el GPX sintético para esta capa.
+
+Se puede elegir Mallasa/Valle de la Luna, Palca, zona sur y un sector de la Cordillera. Son recuadros acotados de aproximadamente 2×2 km, no cobertura completa de La Paz. Se distinguen rutas OSM de senderismo y tramos de sendero. Longitud calculada sobre la geometría; dificultad, elevación y duración quedan sin datos cuando no constan. Los segmentos no se unen artificialmente ni se presenta un punto como inicio oficial de marcha.
+
+El selector **Comunidad** mantiene las rutas publicadas por usuarios. La capa externa es de consulta y no mezcla sus identificadores con las actividades/comentarios internos. En cada ficha hay un enlace al elemento original y atribución ODbL.
+
+La caché GIS dura seis horas, se persiste en el volumen `gis-cache` y puede conservarse hasta siete días si las fuentes fallan, con fecha y aviso visibles. Se agrupan consultas simultáneas y se limitan reintentos a un minuto. No se aceptan consultas Overpass, URL ni bbox arbitrarios desde el cliente. Detalles y fuentes: `docs/integracion-gis-web.md`.
 
 ## Tipos de usuario
 

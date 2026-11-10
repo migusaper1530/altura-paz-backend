@@ -10,6 +10,7 @@ dist/
 gis/target/
 deployments/
 media/
+gis-cache/
 local-ca.crt
 evidence/*
 !evidence/resumen-verificacion.md
