@@ -79,7 +79,10 @@ export async function createApplication(mode: string) {
   class AppModule {}
   const app = await NestFactory.create(AppModule, { bodyParser: false });
   app.use(
-    helmet({ contentSecurityPolicy: mode === "gateway" ? false : undefined }),
+    helmet({
+      contentSecurityPolicy: mode === "gateway" ? false : undefined,
+      referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+    }),
   );
   app.use((req: any, res: any, next: any) => {
     res.setHeader("X-Request-Id", randomUUID());

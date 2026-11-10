@@ -6,10 +6,11 @@ import {
   Req,
   Res,
   UnauthorizedException,
+  NotFoundException,
 } from "@nestjs/common";
 import { Request, Response } from "express";
 import { readFile } from "node:fs/promises";
-import { join } from "node:path";
+import { join, resolve, sep, extname } from "node:path";
 import { ResilientHttp } from "./transport";
 import { PublicListCache } from "./cache";
 @Controller()
@@ -18,12 +19,22 @@ export class GatewayController {
     readonly http: ResilientHttp,
     readonly cache: PublicListCache,
   ) {}
-  @Get() index(@Res() res: Response) {
-    res
-      .type("html")
-      .send(
-        `<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Altura Paz · demostración</title><style>body{font:18px Lato,Arial,sans-serif;color:#183f4c;background:#eef3f5;max-width:1100px;margin:48px auto;padding:0 24px}a{color:#176383}p{max-width:75ch;line-height:1.6}img{width:100%;border:1px solid #c9d7dd;border-radius:8px}nav{display:flex;gap:24px;margin:28px 0}</style><h1>Altura Paz</h1><p>Backend para explorar y compartir rutas en los alrededores de La Paz. Importa un GPX, publica la ruta y registra una finalización manual desde la API.</p><nav><a href="/docs">Abrir API interactiva</a><a href="/openapi.json">Contrato OpenAPI</a><a href="/health">Estado del gateway</a></nav><p>Esta pantalla es conceptual. El trazado y sus cifras son ilustrativos y no sirven para navegar. El backend se demuestra con la API y el guion incluido.</p><img src="/concepto.svg" alt="Vista conceptual: mapa, trazado y ficha de una ruta"></html>`,
-      );
+  @Get() async index(@Res() res: Response) {
+    res.type("html").send(await readFile(join(process.cwd(), "public", "index.html")));
+  }
+  @Get(["app.css", "app.mjs", "ui.mjs", "assets/*path", "vendor/*path"])
+  async frontend(@Req() req: Request, @Res() res: Response) {
+    const root = resolve(process.cwd(), "public");
+    const path = resolve(root, "." + decodeURIComponent(req.path));
+    const types: Record<string, string> = {
+      ".css": "text/css", ".js": "application/javascript", ".mjs": "application/javascript",
+      ".svg": "image/svg+xml", ".webp": "image/webp", ".png": "image/png", ".woff2": "font/woff2",
+    };
+    if (!path.startsWith(root + sep) || !types[extname(path)]) throw new NotFoundException();
+    try {
+      res.type(types[extname(path)]).setHeader("Cache-Control", "public, max-age=3600");
+      res.send(await readFile(path));
+    } catch { throw new NotFoundException(); }
   }
   @Get("concepto.svg") async concept(@Res() res: Response) {
     res

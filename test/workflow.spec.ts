@@ -675,6 +675,11 @@ suite("flujos con PostgreSQL/PostGIS, GIS y HTTP reales", () => {
       "/docs",
       "/openapi.json",
       "/concepto.svg",
+      "/app.css",
+      "/app.mjs",
+      "/ui.mjs",
+      "/vendor/leaflet/leaflet.js",
+      "/assets/huayna-potosi.webp",
       "/health",
     ])
       expect((await call("GET", path)).status).toBe(200);

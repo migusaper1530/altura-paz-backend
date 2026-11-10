@@ -23,6 +23,7 @@ jobs:
       - name: Comprobación estática y contrato
         run: |
           npm run lint
+          npm run frontend:test
           npm run contract:test
       - name: Construir y arrancar entorno aislado
         run: |

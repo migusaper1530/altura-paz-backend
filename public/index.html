@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#173e32"><meta name="description" content="Explora, comparte y organiza tus rutas de senderismo en La Paz y sus alrededores.">
+  <title>Altura Paz — Encuentra tu próximo camino</title>
+  <link rel="icon" href="/assets/montana.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/vendor/leaflet/leaflet.css"><link rel="stylesheet" href="/app.css">
+  <script src="/vendor/leaflet/leaflet.js" defer></script><script type="module" src="/app.mjs"></script>
+</head>
+<body>
+  <a href="#route-list" class="skip-link">Saltar a las rutas</a>
+  <header class="site-header">
+    <a href="/" class="brand" aria-label="Altura Paz, inicio"><img src="/assets/montana.svg" alt="" width="42" height="42"><span>altura<span class="brand-light">paz</span><small>El camino nos encuentra.</small></span></a>
+    <nav class="main-nav" aria-label="Principal"><button class="nav-link active" data-view="explore">Explorar</button><button class="nav-link" data-view="mine">Mis rutas</button><button class="nav-link" data-view="activity">Mi actividad</button><button class="nav-link" data-view="admin" id="admin-nav" hidden>Administración</button></nav>
+    <div class="header-actions"><button class="button secondary import-button" data-action="import"><span aria-hidden="true">＋</span> <span class="import-word">Importar</span> GPX</button><button class="button primary" data-action="account" id="account-button">Ingresar <span aria-hidden="true">↗</span></button></div>
+  </header>
+  <main class="explorer" id="explorer">
+    <section class="sidebar" aria-label="Buscar rutas">
+      <div class="intro"><div class="region-label"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg> La Paz, Bolivia</div><h1>Hay un camino<br>esperándote.</h1><p>Sal de la rutina. Encuentra tu próxima<br class="wide-break"> aventura cerca de La Paz.</p><div class="intro-photo"><img src="/assets/huayna-potosi.webp" alt="Laguna y montañas en el entorno del Huayna Potosí" width="800" height="536"><span>Un poco más cerca de la montaña.</span></div></div>
+      <div class="search-area"><form id="search-form" role="search"><label class="search-box"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><path d="m15 15 5 5"/></svg><input id="search" name="q" type="search" placeholder="Busca una ruta o un lugar" aria-label="Buscar rutas" maxlength="100"><kbd aria-hidden="true">↵</kbd></label></form><div class="filters" aria-label="Filtrar rutas"><button class="filter active" data-difficulty="">Todas</button><button class="filter" data-difficulty="easy">Fáciles</button><button class="filter" data-difficulty="moderate">Moderadas</button><button class="filter" data-difficulty="hard">Exigentes</button></div></div>
+      <div class="results-heading"><div><h2 id="list-title">Rutas para descubrir</h2><span id="result-count" aria-live="polite">Buscando caminos…</span></div><label class="sort-label"><span class="sr-only">Ordenar rutas</span><select id="sort"><option value="recent">Más recientes</option><option value="short">Más cortas</option><option value="long">Más largas</option></select></label></div>
+      <div id="status-banner" class="status-banner" hidden></div>
+      <div id="route-list" class="route-list" aria-live="polite" tabindex="-1"></div>
+      <button class="button secondary load-more" id="load-more" hidden>Cargar más rutas</button>
+      <footer class="sidebar-footer"><span class="small-mountain" aria-hidden="true">⌁</span><p>Camina a tu ritmo. Cuida el camino.</p><button class="text-button" data-action="credits">Créditos del paisaje y el mapa</button></footer>
+    </section>
+    <section class="map-region" aria-label="Mapa de rutas de La Paz">
+      <div id="map" role="region" aria-label="Mapa interactivo. Las rutas también están disponibles en la lista."></div>
+      <div class="map-top"><div class="map-location"><span class="live-dot" aria-hidden="true"></span><strong>La Paz y alrededores</strong><span class="map-location-country">Bolivia</span></div><button id="fit-map" class="icon-button" title="Mostrar todas las rutas" aria-label="Mostrar todas las rutas"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3H3v6m12-6h6v6M3 15v6h6m12-6v6h-6M8 8l8 8m-8 0 8-8"/></svg></button></div>
+      <div class="map-tools"><button class="icon-button" id="locate" title="Ver mi ubicación" aria-label="Mostrar mi ubicación"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="1.5"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/></svg></button></div>
+      <div class="map-bottom"><div class="map-legend"><i></i> Rutas compartidas <span class="legend-end"></span> Llegada</div><button class="map-note" data-action="about-map">Acerca del mapa</button></div>
+      <article id="map-card" class="map-card" hidden></article>
+      <div id="map-message" class="map-message" hidden></div>
+    </section>
+    <section class="workspace" id="workspace" hidden aria-label="Mi espacio"></section>
+  </main>
+  <div class="mobile-switch"><button class="active" data-mobile="list">☰ Lista</button><button data-mobile="map">⌖ Mapa</button></div>
+  <div id="design-banner" class="design-banner" hidden><span><strong>Vista de diseño</strong> Rutas y cifras de ejemplo. Trazados ilustrativos, no aptos para navegar.</span><a href="/">Ver rutas reales</a></div>
+  <dialog id="modal" aria-labelledby="modal-title"><div class="modal-heading"><div><p id="modal-kicker"></p><h2 id="modal-title"></h2></div><button class="icon-button close-modal" data-action="close" aria-label="Cerrar ventana">✕</button></div><div id="modal-body"></div></dialog>
+  <div id="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>

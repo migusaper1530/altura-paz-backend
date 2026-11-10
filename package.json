@@ -16,7 +16,9 @@
     "contract:deploy": "node scripts/deploy-contract.mjs",
     "contract:test": "node --test test/contract.test.mjs",
     "demo": "node scripts/demo.mjs",
-    "integration": "jest --runInBand test/workflow.spec.ts"
+    "integration": "jest --runInBand test/workflow.spec.ts",
+    "frontend:preview": "node scripts/frontend-preview.mjs",
+    "frontend:test": "node --test test/frontend.test.mjs"
   },
   "dependencies": {
     "@nestjs/common": "^11.2.8",

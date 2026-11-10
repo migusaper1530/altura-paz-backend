@@ -1,6 +1,6 @@
 # Diagramas de arquitectura de Altura Paz
 
-Los diagramas describen el prototipo local. Las integraciones externas GIS se investigaron y no forman parte del camino crítico de la demo. La vista de frontend es conceptual.
+Los diagramas describen el prototipo local. Las integraciones externas GIS se investigaron y no forman parte del camino crítico de la demo. El frontend HTML/CSS/JavaScript se sirve desde el gateway y consume la API del mismo origen. La vista `?demo=1` muestra datos ilustrativos.
 
 ## C4 nivel 1: contexto
 
@@ -19,7 +19,7 @@ flowchart LR
 ```mermaid
 flowchart TB
   API["Cliente de demostración · OpenAPI / Postman / script"] --> GW
-  VIEW["Vista conceptual · no frontend completo"] -.-> GW
+  VIEW["Frontend responsive · HTML / CSS / JavaScript + Leaflet"] --> GW
   subgraph LOCAL["Altura Paz · Docker Compose"]
     TLS["Caddy opcional · TLS 1.3"] --> GW["API Gateway · NestJS"]
     GW -->|HTTP y JWT| ID["Identidad · NestJS"]

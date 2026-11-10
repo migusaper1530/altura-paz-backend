@@ -4,7 +4,7 @@ Repositorio: [migusaper1530/altura-paz-backend](https://github.com/migusaper1530
 
 MVP académico para importar GPX y publicar rutas alrededor de La Paz. Incluye API, cuatro tipos de cuenta, PostGIS, procesamiento GPX en Spring Boot, aprobación de cambios populares, finalizaciones manuales únicas y pruebas de versiones en una EVM local.
 
-La vista de mapa es **conceptual**. El GPX incluido es **sintético y no sirve para navegar**. La ejecución local no equivale a haber desplegado el contrato en Sepolia ni a una defensa académica terminada.
+El frontend permite explorar el mapa, gestionar la cuenta, importar/publicar GPX y registrar actividades. La vista de diseño utiliza datos de ejemplo identificados. El GPX incluido es **sintético y no sirve para navegar**. La ejecución local no equivale a haber desplegado el contrato en Sepolia ni a una defensa académica terminada.
 
 ## Empezar
 
@@ -16,7 +16,8 @@ bash iniciar.sh
 
 El primer arranque descarga dependencias e imágenes. Después abre:
 
-- Demostración y vista conceptual: <http://localhost:8088>
+- Sitio web conectado a la API: <http://localhost:8088>
+- Vista de diseño con rutas de ejemplo: <http://localhost:8088/?demo=1>
 - API interactiva: <http://localhost:8088/docs>
 - Contrato de API: <http://localhost:8088/openapi.json>
 
@@ -35,6 +36,22 @@ Para parar sin borrar la base ni fotografías:
 ```bash
 docker compose down
 ```
+
+## Frontend
+
+El sitio se sirve desde el gateway, en el mismo origen que la API. Incluye búsqueda y filtros, mapa Leaflet/OpenStreetMap, fichas de rutas, registro/inicio de sesión, edición de perfiles, importación GPX a borrador, publicación/edición de rutas propias, finalizaciones manuales, comentarios y fotos. Administración tiene revisión de guías y cambios populares, además de alta de administradores. El diseño funciona en escritorio y móvil.
+
+Para revisar **solo el diseño** sin arrancar Docker:
+
+```bash
+npm run frontend:preview
+```
+
+Abre <http://localhost:8090/?demo=1>. El modo de ejemplo solo permite explorar y revisar formularios: no crea usuarios ni guarda actividades. Para utilizar la API real, arranca el proyecto y abre <http://localhost:8088> sin `demo=1`. La vista previa estática termina con Ctrl+C.
+
+Los JWT se conservan solo en memoria de la pestaña y caducan a los quince minutos. Recargar o cerrar la pestaña requiere ingresar de nuevo. La ubicación se solicita solo al pulsar su control, se muestra localmente y no se envía a la API. No hay descargas de teselas para uso sin conexión. Las fotografías de paisaje y las fuentes se incluyen localmente con sus créditos y licencias en `public/assets/`; la cartografía requiere conexión.
+
+Código de interfaz: `public/index.html`, `public/app.css`, `public/app.mjs` y `public/ui.mjs`. No requiere una compilación frontend ni nuevas dependencias del backend. Decisiones visuales: `docs/frontend-diseno.md`.
 
 ## Tipos de usuario
 
