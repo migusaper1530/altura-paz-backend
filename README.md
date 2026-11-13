@@ -37,6 +37,16 @@ Para parar sin borrar la base ni fotografías:
 docker compose down
 ```
 
+Para volver a iniciar una instalación ya compilada, sin descargar dependencias ni reconstruir imágenes:
+
+```bash
+docker compose up -d --no-build
+```
+
+Si `npm ci` falla durante una compilación con `ETIMEDOUT`, la descarga agotó su tiempo de espera. Comprueba la conexión y vuelve a ejecutar `docker compose up -d --build`; si ya existen las imágenes locales, puedes utilizar el comando anterior.
+
+La red del proyecto usa `172.30.50.0/24` para evitar la superposición detectada entre la red automática de Docker y una Wi-Fi `172.18.0.0/19`. Si esa subred tampoco está libre en tu equipo, configura `ALTURA_SUBNET` en `.env` con una subred privada disponible. Al cambiarla en una instalación existente, ejecuta `docker compose down` y después `docker compose up -d --no-build` para recrear la red conservando los volúmenes. Referencia: [configuración IPAM de Docker Compose](https://docs.docker.com/reference/compose-file/networks/#ipam).
+
 ## Frontend
 
 El sitio se sirve desde el gateway, en el mismo origen que la API. Incluye búsqueda y filtros, mapa Leaflet/OpenStreetMap, fichas de rutas, registro/inicio de sesión, edición de perfiles, importación GPX a borrador, publicación/edición de rutas propias, finalizaciones manuales, comentarios y fotos. Administración tiene revisión de guías y cambios populares, además de alta de administradores. El diseño funciona en escritorio y móvil.

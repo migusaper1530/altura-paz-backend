@@ -210,4 +210,7 @@ volumes:
   caddy-config: {}
   gis-cache: {}
 networks:
-  backend: {}
+  backend:
+    ipam:
+      config:
+        - subnet: ${ALTURA_SUBNET:-172.30.50.0/24}
